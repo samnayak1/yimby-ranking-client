@@ -1,11 +1,10 @@
-import { Button, Dropdown } from 'antd';
-import { UserOutlined, LogoutOutlined } from '@ant-design/icons';
-import { signOut } from 'aws-amplify/auth';
-import type { AuthUser } from '../types';
-
+import { signOut } from "aws-amplify/auth";
+import type { AuthUser } from "../types";
+import { Button, Dropdown } from "antd";
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 
 interface Props {
-  user: AuthUser;
+  user: AuthUser | null;
   onLogout: () => void;
 }
 
@@ -25,28 +24,40 @@ export default function Navbar({ user, onLogout }: Props) {
           </div>
           <div>
             <span className="font-bold text-yimby-700 text-sm tracking-tight">YIMBY Tracker</span>
-            <span className="hidden sm:inline text-xs text-yimby-400 ml-2">Housing Policy Intelligence</span>
           </div>
         </div>
 
-        <Dropdown
-          menu={{
-            items: [
-              { key: 'email', label: user.email, disabled: true },
-              { type: 'divider' },
-              { key: 'logout', label: 'Sign out', icon: <LogoutOutlined />, onClick: handleLogout },
-            ],
-          }}
-          placement="bottomRight"
-        >
-          <Button
-            type="text"
-            icon={<UserOutlined />}
-            className="flex items-center gap-1.5 text-gray-600 hover:text-yimby-600"
+        {user && (
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: 'email',
+                  label: user.email,
+                  disabled: true,
+                },
+                {
+                  type: 'divider',
+                },
+                {
+                  key: 'logout',
+                  label: 'Sign out',
+                  icon: <LogoutOutlined />,
+                  onClick: handleLogout,
+                },
+              ],
+            }}
+            placement="bottomRight"
           >
-            <span className="text-sm hidden sm:inline">{user.email}</span>
-          </Button>
-        </Dropdown>
+            <Button
+              type="text"
+              icon={<UserOutlined />}
+              className="flex items-center gap-1.5 text-gray-600 hover:text-yimby-600"
+            >
+              <span className="text-sm hidden sm:inline">{user.email}</span>
+            </Button>
+          </Dropdown>
+        )}
 
       </div>
     </header>

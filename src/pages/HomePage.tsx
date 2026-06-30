@@ -7,7 +7,7 @@ import Navbar from '../components/NavBar';
 
 
 interface Props {
-  user:    AuthUser;
+  user:    AuthUser|null;
   isAdmin: boolean;
   onLogout: () => void;
 }
@@ -19,7 +19,7 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
 
       <main className="max-w-7xl mx-auto px-6 py-8">
 
-        {/* Page header */}
+  
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-yimby-800 tracking-tight">
             Housing Policy Tracker
@@ -29,7 +29,7 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
           </p>
         </div>
 
-        {/* Tabs */}
+
         <div className="bg-white rounded-2xl shadow-sm border border-yimby-100 p-6">
           <Tabs
             defaultActiveKey="politicians"

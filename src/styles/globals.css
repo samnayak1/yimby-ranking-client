@@ -1,45 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-yimby-50: #f0faf4;
+  --color-yimby-100: #d9f2e3;
+  --color-yimby-500: #2da066;
+  --color-yimby-600: #1f8051;
+
+  --font-sans: Inter, sans-serif;
+}
 
 @layer base {
   body {
-    @apply font-sans bg-yimby-50 text-gray-800 antialiased;
+    @apply bg-yimby-50 text-gray-800 antialiased font-sans;
   }
-}
-
-/* Ant Design token overrides via CSS */
-.ant-btn-primary {
-  background-color: #2da066 !important;
-  border-color: #2da066 !important;
-}
-.ant-btn-primary:hover {
-  background-color: #1f8051 !important;
-  border-color: #1f8051 !important;
-}
-.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #2da066 !important;
-}
-.ant-tabs-ink-bar {
-  background: #2da066 !important;
-}
-.ant-tabs-tab:hover {
-  color: #2da066 !important;
-}
-.ant-table-thead > tr > th {
-  background: #f0faf4 !important;
-  color: #1a6641 !important;
-  font-weight: 600 !important;
-}
-.ant-pagination-item-active {
-  border-color: #2da066 !important;
-}
-.ant-pagination-item-active a {
-  color: #2da066 !important;
-}
-
-/* Leaflet dark-mode fix for light theme */
-.leaflet-container {
-  font-family: 'Inter', sans-serif;
-  border-radius: 8px;
 }
