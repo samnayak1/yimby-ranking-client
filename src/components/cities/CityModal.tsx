@@ -1,8 +1,16 @@
+import { useEffect, useState } from 'react';
+import {
+  Modal,
+  Form,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  message,
+} from 'antd';
 
-import {  useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, Select, message } from 'antd';
 import { useCreateCity, useUpdateCity } from '../../hooks/cities.hook';
-
+import LocationPickerModal from './LocationPickerModal';
 
 interface CityModalProps {
   visible: boolean;
@@ -10,13 +18,31 @@ interface CityModalProps {
   editingCity?: any | null;
 }
 
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CNY', 'INR', 'BRL', 'MXN'];
+const CURRENCIES = [
+  'USD',
+  'EUR',
+  'GBP',
+  'CAD',
+  'AUD',
+  'JPY',
+  'CNY',
+  'INR',
+  'BRL',
+  'MXN',
+];
 
-export default function CityModal({ visible, onClose, editingCity }: CityModalProps) {
+export default function CityModal({
+  visible,
+  onClose,
+  editingCity,
+}: CityModalProps) {
   const [form] = Form.useForm();
+
   const createMutation = useCreateCity();
   const updateMutation = useUpdateCity(editingCity?.id);
-  
+
+  const [locationPickerOpen, setLocationPickerOpen] = useState(false);
+
   const isEditing = !!editingCity;
 
   useEffect(() => {
@@ -31,7 +57,7 @@ export default function CityModal({ visible, onClose, editingCity }: CityModalPr
         currency: editingCity.currency,
         notes: editingCity.notes,
       });
-    } else {
+    } else if (visible) {
       form.resetFields();
     }
   }, [visible, editingCity, form]);
@@ -39,7 +65,7 @@ export default function CityModal({ visible, onClose, editingCity }: CityModalPr
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
+
       if (isEditing) {
         await updateMutation.mutateAsync(values);
         message.success('City updated successfully');
@@ -47,103 +73,156 @@ export default function CityModal({ visible, onClose, editingCity }: CityModalPr
         await createMutation.mutateAsync(values);
         message.success('City created successfully');
       }
+
       onClose();
-    } catch (error) {
-      message.error(isEditing ? 'Failed to update city' : 'Failed to create city');
+    } catch {
+      message.error(
+        isEditing
+          ? 'Failed to update city'
+          : 'Failed to create city'
+      );
     }
   };
 
   return (
-    <Modal
-      title={isEditing ? 'Edit City' : 'Create New City'}
-      open={visible}
-      onCancel={onClose}
-      onOk={handleSubmit}
-      confirmLoading={createMutation.isPending || updateMutation.isPending}
-      width={600}
-    >
-      <Form form={form} layout="vertical">
-        <Form.Item
-          name="name"
-          label="City Name"
-          rules={[{ required: true, message: 'Please enter city name' }]}
-        >
-          <Input placeholder="Enter city name" />
-        </Form.Item>
-
-        <Form.Item
-          name="country"
-          label="Country"
-          rules={[{ required: true, message: 'Please enter country' }]}
-        >
-          <Input placeholder="Enter country" />
-        </Form.Item>
-
-        <Form.Item
-          name="region"
-          label="Region / State"
-        >
-          <Input placeholder="Enter region or state (optional)" />
-        </Form.Item>
-
-        <div className="grid grid-cols-2 gap-4">
+    <>
+      <Modal
+        title={isEditing ? 'Edit City' : 'Create New City'}
+        open={visible}
+        onCancel={onClose}
+        onOk={handleSubmit}
+        confirmLoading={
+          createMutation.isPending || updateMutation.isPending
+        }
+        width={650}
+      >
+        <Form form={form} layout="vertical">
           <Form.Item
-            name="lat"
-            label="Latitude"
-            rules={[{ required: true, message: 'Please enter latitude' }]}
+            name="name"
+            label="City Name"
+            rules={[
+              {
+                required: true,
+                message: 'Please enter city name',
+              },
+            ]}
           >
-            <InputNumber
-              placeholder="e.g., 40.7128"
-              className="w-full"
-              step={0.0001}
-            />
+            <Input placeholder="Enter city name" />
           </Form.Item>
 
           <Form.Item
-            name="lng"
-            label="Longitude"
-            rules={[{ required: true, message: 'Please enter longitude' }]}
+            name="country"
+            label="Country"
+            rules={[
+              {
+                required: true,
+                message: 'Please enter country',
+              },
+            ]}
           >
-            <InputNumber
-              placeholder="e.g., -74.0060"
-              className="w-full"
-              step={0.0001}
-            />
+            <Input placeholder="Enter country" />
           </Form.Item>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
+          <Form.Item name="region" label="Region / State">
+            <Input placeholder="Enter region or state" />
+          </Form.Item>
+
+          <div className="flex justify-end mb-4">
+            <Button
+              type="default"
+              onClick={() => setLocationPickerOpen(true)}
+            >
+              📍 Pick on Map
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Form.Item
+              name="lat"
+              label="Latitude"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please enter latitude',
+                },
+              ]}
+            >
+              <InputNumber
+                className="w-full"
+                step={0.000001}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="lng"
+              label="Longitude"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please enter longitude',
+                },
+              ]}
+            >
+              <InputNumber
+                className="w-full"
+                step={0.000001}
+              />
+            </Form.Item>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Form.Item
+              name="medianHousePrice"
+              label="Median House Price"
+            >
+              <InputNumber
+                className="w-full"
+                step={1000}
+                precision={0}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="currency"
+              label="Currency"
+            >
+              <Select placeholder="Select currency">
+                {CURRENCIES.map((currency) => (
+                  <Select.Option
+                    key={currency}
+                    value={currency}
+                  >
+                    {currency}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </div>
+
           <Form.Item
-            name="medianHousePrice"
-            label="Median House Price"
+            name="notes"
+            label="Notes"
           >
-            <InputNumber
-              placeholder="Enter median price"
-              className="w-full"
-              step={1000}
-              precision={0}
-            />
+            <Input.TextArea rows={3} />
           </Form.Item>
+        </Form>
+      </Modal>
 
-          <Form.Item
-            name="currency"
-            label="Currency"
-          >
-            <Select placeholder="Select currency">
-              {CURRENCIES.map(curr => (
-                <Select.Option key={curr} value={curr}>{curr}</Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </div>
-
-        <Form.Item
-          name="notes"
-          label="Notes"
-        >
-          <Input.TextArea rows={3} placeholder="Additional notes about this city" />
-        </Form.Item>
-      </Form>
-    </Modal>
+      <LocationPickerModal
+        open={locationPickerOpen}
+        initialLat={form.getFieldValue('lat')}
+        initialLng={form.getFieldValue('lng')}
+        onCancel={() => setLocationPickerOpen(false)}
+        onSelect={(location) => { 
+          
+          form.setFieldsValue({ name: location.city || form.getFieldValue('name'),
+           country: location.country, region: location.region, lat: location.lat, lng: location.lng, });
+           
+          setLocationPickerOpen(false);
+        
+      }}
+      />
+    </>
   );
 }
+

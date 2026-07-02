@@ -20,7 +20,7 @@ export default function ScoreBadge({ rankings }: Props) {
   const pct     = (latest.ranking / 10) * 100;
 
   return (
-    <div className="flex items-center gap-2 min-w-[100px]">
+    <div className="flex items-center gap-2 min-w-25">
       <span
         className="font-mono font-bold text-base w-5 text-right"
         style={{ color }}

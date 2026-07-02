@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getAccessToken } from './auth.service';
+import type { City, PaginatedResponse, Politician } from '../types';
 
 const client = axios.create({
     baseURL: '/api',
@@ -24,21 +25,23 @@ client.interceptors.response.use(
 
 
 export const politiciansApi = {
-    getAll: () => client.get<{ data: any[]; count: number }>('/politicians').then(r => r.data),
+    getAll: (params?: any) => client.get<PaginatedResponse<Politician>>('/politicians', { params }),
     getById: (id: number) => client.get<{ data: any }>(`/politicians/${id}`).then(r => r.data),
     create: (body: any) => client.post<{ data: any }>('/politicians', body).then(r => r.data),
     update: (id: number, body: any) => client.patch<{ data: any }>(`/politicians/${id}`, body).then(r => r.data),
     delete: (id: number) => client.delete(`/politicians/${id}`),
     upsertRanking: (id: number, year: number, ranking: number) => client.put<{ data: any }>(`/politicians/${id}/rankings`, { year, ranking }).then(r => r.data),
+    getFilterOptions: () => client.get<{ designations: string[]; politicalLeanings: string[]; nationalities: string[]; }>('/politicians/filter/filter-options'),
 };
 
 
 
 export const citiesApi = {
-    getAll: () => client.get<{ data: any[]; count: number }>('/cities').then(r => r.data),
-    getById: (id: number) => client.get<{ data: any }>(`/cities/${id}`).then(r => r.data),
+    getAll: (params?: any) => client.get<PaginatedResponse<City>>('/cities', { params }),
+    getById: (id: number) => client.get<{ data: City }>(`/cities/${id}`).then(r => r.data),
     create: (body: any) => client.post<{ data: any }>('/cities', body).then(r => r.data),
     update: (id: number, body: any) => client.patch<{ data: any }>(`/cities/${id}`, body).then(r => r.data),
     delete: (id: number) => client.delete(`/cities/${id}`),
     upsertRanking: (id: number, year: number, ranking: number) => client.put<{ data: any }>(`/cities/${id}/rankings`, { year, ranking }).then(r => r.data),
+    getFilterOptions: () => client.get<{ countries: string[], regions: string[], currencies: string[] }>('/cities/filter/filter-options'),
 };

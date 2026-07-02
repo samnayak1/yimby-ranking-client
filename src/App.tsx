@@ -17,7 +17,7 @@ const antTheme = {
 export default function App() {
   const { user, loading, isAdmin, reload } = useAuth();
 
-  console.log("isAdmin",isAdmin)
+ 
 
   if (loading) {
     return (

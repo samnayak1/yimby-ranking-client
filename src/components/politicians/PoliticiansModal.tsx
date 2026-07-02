@@ -1,24 +1,29 @@
-
-import {  useEffect } from 'react';
-import { Modal, Form, Input, Select, Switch,  message } from 'antd';
+import { useEffect } from 'react';
+import { Modal, Form, Input, Select, Switch, message } from 'antd';
 import { useCreatePolitician, useUpdatePolitician } from '../../hooks/politicians.hook';
-import { useCities } from '../../hooks/cities.hook';
+import { countryOptions } from '../../utils/countries.utils';
 
-
-interface PoliticianModalProps {
+interface Props {
   visible: boolean;
   onClose: () => void;
   editingPolitician?: any | null;
 }
 
-export default function PoliticianModal({ visible, onClose, editingPolitician }: PoliticianModalProps) {
+const DESIGNATIONS = [
+  'President', 'Vice President', 'Prime Minister', 'Governor', 'Mayor',
+  'Senator', 'Comptroller', 'Chief Minister', 'Minister', 'MP', 'Councillor', 'Other',
+];
+
+const LEANINGS = [
+  'Liberal', 'Conservative', 'Democratic Socialist',
+  'Libertarian', 'Nationalist', 'Green', 'Independent',
+];
+
+export default function PoliticianModal({ visible, onClose, editingPolitician }: Props) {
   const [form] = Form.useForm();
   const createMutation = useCreatePolitician();
   const updateMutation = useUpdatePolitician(editingPolitician?.id);
-  const { data: citiesData } = useCities();
-  
   const isEditing = !!editingPolitician;
-  const cities = citiesData ?? [];
 
   useEffect(() => {
     if (visible && editingPolitician) {
@@ -27,28 +32,31 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
         designation: editingPolitician.designation,
         politicalLeaning: editingPolitician.politicalLeaning,
         nationality: editingPolitician.nationality,
-        isInOffice: editingPolitician.isInOffice,
-        city_id: editingPolitician.city_id,
+        // DB stores 0/1 — Switch needs boolean
+        isInOffice: editingPolitician.isInOffice === 1,
         notes: editingPolitician.notes,
       });
-    } else {
+    } else if (visible) {
       form.resetFields();
     }
-  }, [visible, editingPolitician, form]);
+  }, [visible, editingPolitician]);
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      
+
+      // Convert boolean back to 0/1 for the API
+      const payload = { ...values, isInOffice: values.isInOffice ? 1 : 0 };
+
       if (isEditing) {
-        await updateMutation.mutateAsync(values);
+        await updateMutation.mutateAsync(payload);
         message.success('Politician updated successfully');
       } else {
-        await createMutation.mutateAsync(values);
+        await createMutation.mutateAsync(payload);
         message.success('Politician created successfully');
       }
       onClose();
-    } catch (error) {
+    } catch {
       message.error(isEditing ? 'Failed to update politician' : 'Failed to create politician');
     }
   };
@@ -61,71 +69,53 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
       onOk={handleSubmit}
       confirmLoading={createMutation.isPending || updateMutation.isPending}
       width={600}
+      destroyOnClose
     >
-      <Form form={form} layout="vertical">
-        <Form.Item
-          name="name"
-          label="Name"
-          rules={[{ required: true, message: 'Please enter politician name' }]}
-        >
+      <Form form={form} layout="vertical" initialValues={{ isInOffice: true }}>
+        <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Name is required' }]}>
           <Input placeholder="Enter politician name" />
         </Form.Item>
 
-        <Form.Item
-          name="designation"
-          label="Designation"
-          rules={[{ required: true, message: 'Please enter designation' }]}
-        >
-          <Input placeholder="e.g., Mayor, Senator, City Council Member" />
-        </Form.Item>
-
-        <Form.Item
-          name="politicalLeaning"
-          label="Political Leaning"
-        >
-          <Select placeholder="Select political leaning" allowClear>
-            <Select.Option value="Liberal">Liberal</Select.Option>
-            <Select.Option value="Conservative">Conservative</Select.Option>
-            <Select.Option value="Democratic Socialist">Democratic Socialist</Select.Option>
-            <Select.Option value="Libertarian">Libertarian</Select.Option>
-            <Select.Option value="Nationalist">Nationalist</Select.Option>
-            <Select.Option value="Green">Green</Select.Option>
+        <Form.Item name="designation" label="Designation" rules={[{ required: true, message: 'Designation is required' }]}>
+          <Select placeholder="Select designation" allowClear showSearch>
+            {DESIGNATIONS.map(d => (
+              <Select.Option key={d} value={d}>{d}</Select.Option>
+            ))}
           </Select>
         </Form.Item>
 
-        <Form.Item
-          name="nationality"
-          label="Nationality"
-        >
-          <Input placeholder="Enter nationality" />
-        </Form.Item>
-
-        <Form.Item
-          name="city_id"
-          label="Associated City"
-        >
-          <Select placeholder="Select associated city" allowClear>
-            {cities.map(city => (
-              <Select.Option key={city.id} value={city.id}>
-                {city.name}
-              </Select.Option>
+        <Form.Item name="politicalLeaning" label="Political Leaning">
+          <Select placeholder="Select political leaning" allowClear>
+            {LEANINGS.map(l => (
+              <Select.Option key={l} value={l}>{l}</Select.Option>
             ))}
           </Select>
         </Form.Item>
 
         <Form.Item
-          name="isInOffice"
-          label="Currently In Office"
-          valuePropName="checked"
+          name="country"
+          label="Country"
+          rules={[
+            {
+              required: true,
+              message: "Please select a country",
+            },
+          ]}
         >
+          <Select
+            showSearch
+            placeholder="Select a country"
+            options={countryOptions}
+            optionFilterProp="label"
+          />
+        </Form.Item>
+
+        <Form.Item name="isInOffice" label="Currently In Office" valuePropName="checked">
           <Switch />
         </Form.Item>
 
-        <Form.Item
-          name="notes"
-          label="Notes"
-        >
-          <Input.TextArea rows={3} placeholder="Additional notes about this politician" />
+        <Form.Item name="notes" label="Notes">
+          <Input.TextArea rows={4} maxLength={1000} showCount placeholder="Additional notes about this politician." />
         </Form.Item>
       </Form>
     </Modal>

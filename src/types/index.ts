@@ -32,3 +32,55 @@ export interface AuthUser {
   email:  string;
   groups: string[];
 }
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  filters?: Record<string, any>;
+}
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface CityFilters extends PaginationParams {
+  search?: string;
+  country?: string;
+  region?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minScore?: number;
+  maxScore?: number;
+}
+
+
+export interface PoliticianFilters extends PaginationParams {
+  search?: string;
+  designation?: string;
+  politicalLeaning?: string;
+  nationality?: string;
+  isInOffice?: boolean;
+  minScore?: number;
+  maxScore?: number;
+  cityId?: number;
+}
+
+export type CityFilterOptions = {
+  countries: string[];
+  regions: string[];
+  currencies: string[];
+}
+
+export type PoliticianFilterOptions = {
+  designations: string[];
+  politicalLeanings: string[];
+  nationalities: string[];
+}
