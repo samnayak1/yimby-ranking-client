@@ -5,6 +5,7 @@ import { usePoliticianFilterOptions } from '../../hooks/politicians.hook';
 import { useDebounce } from '../../hooks/useDebounce';
 import { FALLBACK_FILTER_OPTIONS, SCORE_RANGES } from '../../types/fallbackFilterOptions';
 import type { PoliticianFilters } from '../../types';
+import { getCountryName } from '../../utils/countries.utils';
 
 const { Option } = Select;
 
@@ -108,8 +109,8 @@ export default function PoliticianFiltersComponent({ filters, onFilterChange }: 
         <Col xs={24} sm={12} md={8} lg={6}>
           <Select
             placeholder="Nationality"
-            value={filters.nationality}
-            onChange={v => handleChange('nationality', v)}
+            value={filters.nationalityCode}
+            onChange={v => handleChange('nationalityCode', v)}
             loading={isLoading && !data}
             allowClear
             className="w-full"
@@ -117,7 +118,7 @@ export default function PoliticianFiltersComponent({ filters, onFilterChange }: 
             optionFilterProp="children"
           >
             {filterOptions.nationalities?.map(n => (
-              <Option key={n} value={n}>{n}</Option>
+              <Option key={n} value={n}>{getCountryName(n)}</Option>
             ))}
           </Select>
         </Col>

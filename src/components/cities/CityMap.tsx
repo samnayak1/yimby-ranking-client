@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import type { City } from '../../types';
+import { getCountryName } from '../../utils/countries.utils';
 
 
 interface Props {
@@ -75,7 +76,7 @@ export default function CityMap({ cities }: Props) {
           .bindPopup(`
             <div style="font-family:Inter,sans-serif;min-width:160px">
               <div style="font-weight:700;color:#1a6641;margin-bottom:4px">${c.name}</div>
-              <div style="color:#6b7280;font-size:12px">${c.country}${c.region ? `, ${c.region}` : ''}</div>
+              <div style="color:#6b7280;font-size:12px">${getCountryName(c.countryCode)}${c.region ? `, ${c.region}` : ''}</div>
               <div style="margin-top:8px;font-size:12px">
                 <span style="color:#9ca3af">Median price:</span> ${price}
               </div>

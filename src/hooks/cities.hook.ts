@@ -11,6 +11,18 @@ export const cityKeys = {
   filterOptions: () => [...cityKeys.all, 'filter-options'] as const,
 };
 
+interface UpdateCityInput {
+  id: number;
+  name: string;
+  countryCode: string;
+  region?: string;
+  medianHousePrice?: number;
+  currency?: string;
+  notes?: string;
+  lat?: number;
+  lng?: number;
+}
+
 export function useCities(filters: CityFilters = {}) {
   return useQuery({
     queryKey: cityKeys.list(filters),
@@ -45,13 +57,18 @@ export function useCreateCity() {
   });
 }
 
-export function useUpdateCity(id: number) {
-  const qc = useQueryClient();
+export function useUpdateCity() {
+  const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: (data: any) => citiesApi.update(id, data).then(res => res.data),
-    onSuccess: (data) => {
-      qc.invalidateQueries({ queryKey: cityKeys.lists() });
-      qc.setQueryData(cityKeys.detail(id), data);
+    mutationFn: async ({ id, ...body }: UpdateCityInput) => {
+      return citiesApi.update(id, body);
+    },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['cities'],
+      });
     },
   });
 }

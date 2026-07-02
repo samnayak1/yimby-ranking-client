@@ -5,6 +5,7 @@ import { useCityFilterOptions } from '../../hooks/cities.hook';
 import { useDebounce } from '../../hooks/useDebounce';
 import { FALLBACK_FILTER_OPTIONS, PRICE_RANGES, SCORE_RANGES } from '../../types/fallbackFilterOptions';
 import type { CityFilters } from '../../types';
+import { getCountryName } from '../../utils/countries.utils';
 
 const { Option } = Select;
 
@@ -92,8 +93,8 @@ export default function CityFiltersComponent({ filters, onFilterChange }: Props)
         <Col xs={24} sm={12} md={8} lg={6}>
           <Select
             placeholder="Country"
-            value={filters.country}
-            onChange={v => handleChange('country', v)}
+            value={filters.countryCode}
+            onChange={v => handleChange('countryCode', v)}
             loading={isLoading && !data}
             allowClear
             className="w-full"
@@ -101,7 +102,7 @@ export default function CityFiltersComponent({ filters, onFilterChange }: Props)
             optionFilterProp="children"
           >
             {filterOptions.countries?.map(c => (
-              <Option key={c} value={c}>{c}</Option>
+              <Option key={c} value={c}>{getCountryName(c)}</Option>
             ))}
           </Select>
         </Col>

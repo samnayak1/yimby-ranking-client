@@ -13,8 +13,7 @@ export const FALLBACK_FILTER_OPTIONS = {
       'Oslo', 'Copenhagen',
     ],
     currencies: [
-      'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'INR',
-      'BRL', 'MXN', 'SEK', 'NOK', 'DKK', 'NZD', 'SGD', 'KRW',
+      'USD'
     ],
   },
   politicians: {

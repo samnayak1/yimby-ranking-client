@@ -8,27 +8,19 @@ import {
   Button,
   message,
 } from 'antd';
-
+import { countryOptions } from '../../utils/countries.utils';
 import { useCreateCity, useUpdateCity } from '../../hooks/cities.hook';
 import LocationPickerModal from './LocationPickerModal';
+import type { City } from '../../types';
 
 interface CityModalProps {
   visible: boolean;
   onClose: () => void;
-  editingCity?: any | null;
+  editingCity?: City | null;
 }
 
 const CURRENCIES = [
-  'USD',
-  'EUR',
-  'GBP',
-  'CAD',
-  'AUD',
-  'JPY',
-  'CNY',
-  'INR',
-  'BRL',
-  'MXN',
+  'USD'
 ];
 
 export default function CityModal({
@@ -39,7 +31,7 @@ export default function CityModal({
   const [form] = Form.useForm();
 
   const createMutation = useCreateCity();
-  const updateMutation = useUpdateCity(editingCity?.id);
+  const updateMutation = useUpdateCity();
 
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
 
@@ -49,7 +41,7 @@ export default function CityModal({
     if (visible && editingCity) {
       form.setFieldsValue({
         name: editingCity.name,
-        country: editingCity.country,
+        countryCode: editingCity.countryCode,
         region: editingCity.region,
         lat: editingCity.lat,
         lng: editingCity.lng,
@@ -62,27 +54,32 @@ export default function CityModal({
     }
   }, [visible, editingCity, form]);
 
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
+ const handleSubmit = async () => {
+  try {
+    const values = await form.validateFields();
 
-      if (isEditing) {
-        await updateMutation.mutateAsync(values);
-        message.success('City updated successfully');
-      } else {
-        await createMutation.mutateAsync(values);
-        message.success('City created successfully');
-      }
+    if (isEditing) {
+      await updateMutation.mutateAsync({
+        id: editingCity!.id,
+        ...values,
+      });
 
-      onClose();
-    } catch {
-      message.error(
-        isEditing
-          ? 'Failed to update city'
-          : 'Failed to create city'
-      );
+      message.success('City updated successfully');
+    } else {
+      await createMutation.mutateAsync(values);
+
+      message.success('City created successfully');
     }
-  };
+
+    onClose();
+  } catch {
+    message.error(
+      isEditing
+        ? 'Failed to update city'
+        : 'Failed to create city'
+    );
+  }
+};
 
   return (
     <>
@@ -96,7 +93,13 @@ export default function CityModal({
         }
         width={650}
       >
-        <Form form={form} layout="vertical">
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{
+            currency: 'USD',
+          }}
+        >
           <Form.Item
             name="name"
             label="City Name"
@@ -111,16 +114,21 @@ export default function CityModal({
           </Form.Item>
 
           <Form.Item
-            name="country"
+            name="countryCode"
             label="Country"
             rules={[
               {
                 required: true,
-                message: 'Please enter country',
+                message: 'Please select a country',
               },
             ]}
           >
-            <Input placeholder="Enter country" />
+            <Select
+              showSearch
+              placeholder="Select a country"
+              options={countryOptions}
+              optionFilterProp="label"
+            />
           </Form.Item>
 
           <Form.Item name="region" label="Region / State">
@@ -213,14 +221,16 @@ export default function CityModal({
         initialLat={form.getFieldValue('lat')}
         initialLng={form.getFieldValue('lng')}
         onCancel={() => setLocationPickerOpen(false)}
-        onSelect={(location) => { 
-          
-          form.setFieldsValue({ name: location.city || form.getFieldValue('name'),
-           country: location.country, region: location.region, lat: location.lat, lng: location.lng, });
-           
+        onSelect={(location) => {
+
+          form.setFieldsValue({
+            name: location.city || form.getFieldValue('name'),
+            countryCode: location.countryCode, region: location.region, lat: location.lat, lng: location.lng,
+          });
+
           setLocationPickerOpen(false);
-        
-      }}
+
+        }}
       />
     </>
   );

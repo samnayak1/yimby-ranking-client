@@ -8,7 +8,7 @@ export interface Politician {
   name:            string;
   designation:     string | null;
   isInOffice:      number;
-  nationality:     string | null;
+  nationalityCode:     string | null;
   politicalLeaning: string | null;
   notes:           string | null;
   rankings:        Ranking[];
@@ -17,7 +17,7 @@ export interface Politician {
 export interface City {
   id:               number;
   name:             string;
-  country:          string;
+  countryCode:          string;
   region:           string | null;
   medianHousePrice: number | null;
   currency:         string | null;
@@ -53,7 +53,7 @@ export interface PaginationParams {
 
 export interface CityFilters extends PaginationParams {
   search?: string;
-  country?: string;
+  countryCode?: string;
   region?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -66,7 +66,7 @@ export interface PoliticianFilters extends PaginationParams {
   search?: string;
   designation?: string;
   politicalLeaning?: string;
-  nationality?: string;
+  nationalityCode?: string;
   isInOffice?: boolean;
   minScore?: number;
   maxScore?: number;

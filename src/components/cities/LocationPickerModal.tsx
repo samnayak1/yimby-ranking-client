@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Modal, Input, List, Button, Space } from 'antd';
 import L from 'leaflet';
+import { getCountryName } from '../../utils/countries.utils';
 interface SelectedLocation {
     lat: number;
     lng: number;
     city: string;
-    country: string;
+    countryCode: string;
     region: string;
     displayName: string;
 }
@@ -43,11 +44,11 @@ export default function LocationPickerModal({
     const [search, setSearch] = useState('');
     const [results, setResults] = useState<SearchResult[]>([]);
     const [selected, setSelected] = useState<SelectedLocation>();
-    
+
 
     // Create map once
     useEffect(() => {
-        if (!open || !mapContainerRef.current || mapRef.current) return;
+        if (!open || !mapContainerRef.current) return;
 
         const map = L.map(mapContainerRef.current).setView(
             [initialLat ?? 20, initialLng ?? 0],
@@ -64,31 +65,48 @@ export default function LocationPickerModal({
 
         mapRef.current = map;
 
-        setTimeout(() => map.invalidateSize(), 100);
-    }, [open]);
+        if (initialLat && initialLng) {
+            placeMarker(initialLat, initialLng);
+        }
 
-    useEffect(() => {
+        setTimeout(() => map.invalidateSize(), 100);
+
         return () => {
-            mapRef.current?.remove();
+            markerRef.current?.remove();
+            markerRef.current = null;
+
+            map.remove();
             mapRef.current = null;
         };
-    }, []);
+    }, [open]);
 
     const placeMarker = async (lat: number, lng: number) => {
-        if (!mapRef.current) return; if (markerRef.current) { markerRef.current.remove(); }
-        const marker = L.marker([lat, lng], { draggable: true, }).addTo(mapRef.current);
+        const map = mapRef.current;
 
-        marker.on('dragend', async () => { 
-            
-            const pos = marker.getLatLng(); 
-            const location = await reverseGeocode(pos.lat, pos.lng); 
-            setSelected(location); }); 
-            markerRef.current = marker; 
-            mapRef.current.flyTo([lat, lng], 13); 
-            
-            const location = await reverseGeocode(lat, lng); setSelected(location);
+        if (!map) return;
+
+        markerRef.current?.remove();
+
+        const marker = L.marker([lat, lng], {
+            draggable: true,
+        }).addTo(map);
+
+        markerRef.current = marker;
+
+        map.flyTo([lat, lng], 13);
+
+        const location = await reverseGeocode(lat, lng);
+
+        setSelected(location);
+
+        marker.on('dragend', async () => {
+            const pos = marker.getLatLng();
+
+            const updated = await reverseGeocode(pos.lat, pos.lng);
+
+            setSelected(updated);
+        });
     };
-
     const searchPlaces = async () => {
         if (!search.trim()) return;
 
@@ -98,7 +116,7 @@ export default function LocationPickerModal({
             )}&limit=5`
         );
 
-        const data = await res.json();
+        const data: SearchResult[] = await res.json();
 
         setResults(data);
     };
@@ -127,15 +145,15 @@ export default function LocationPickerModal({
                 address.state ??
                 address.county ??
                 '',
-            country: address.country ?? '',
+            countryCode: address.country_code ?? '',
             displayName: data.display_name ?? '',
         };
     }
 
 
 
-    const chooseResult = (result: SearchResult) => {
-        placeMarker(
+    const chooseResult = async (result: SearchResult) => {
+        await placeMarker(
             Number(result.lat),
             Number(result.lon)
         );
@@ -146,27 +164,27 @@ export default function LocationPickerModal({
 
     return (
         <Modal
-  open={open}
-  title="Pick Location"
-  width={900}
-  onCancel={onCancel}
-  footer={[
-    <Button key="cancel" onClick={onCancel}>
-      Cancel
-    </Button>,
-    <Button
-      key="select"
-      type="primary"
-      disabled={!selected}
-      onClick={() => {
-        if (!selected) return;
-        onSelect(selected);
-      }}
-    >
-      Use Location
-    </Button>,
-  ]}
->
+            open={open}
+            title="Pick Location"
+            width={900}
+            onCancel={onCancel}
+            footer={[
+                <Button key="cancel" onClick={onCancel}>
+                    Cancel
+                </Button>,
+                <Button
+                    key="select"
+                    type="primary"
+                    disabled={!selected}
+                    onClick={() => {
+                        if (!selected) return;
+                        onSelect(selected);
+                    }}
+                >
+                    Use Location
+                </Button>,
+            ]}
+        >
             <Space.Compact style={{ width: '100%', marginBottom: 12 }}>
                 <Input
                     placeholder="Search city or address..."
@@ -209,8 +227,18 @@ export default function LocationPickerModal({
 
             {selected && (
                 <div style={{ marginTop: 12 }}>
+                    <strong>City:</strong> {selected.city || '—'}
+                    <br />
+
+                    <strong>Region:</strong> {selected.region || '—'}
+                    <br />
+
+                    <strong>Country:</strong> {getCountryName(selected.countryCode) || '—'}
+                    <br />
+
                     <strong>Latitude:</strong> {selected.lat.toFixed(6)}
                     <br />
+
                     <strong>Longitude:</strong> {selected.lng.toFixed(6)}
                 </div>
             )}

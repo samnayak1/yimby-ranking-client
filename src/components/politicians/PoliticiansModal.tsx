@@ -31,7 +31,7 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
         name: editingPolitician.name,
         designation: editingPolitician.designation,
         politicalLeaning: editingPolitician.politicalLeaning,
-        nationality: editingPolitician.nationality,
+        nationalityCode: editingPolitician.nationalityCode,
         // DB stores 0/1 — Switch needs boolean
         isInOffice: editingPolitician.isInOffice === 1,
         notes: editingPolitician.notes,
@@ -69,7 +69,7 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
       onOk={handleSubmit}
       confirmLoading={createMutation.isPending || updateMutation.isPending}
       width={600}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form form={form} layout="vertical" initialValues={{ isInOffice: true }}>
         <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Name is required' }]}>

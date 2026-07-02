@@ -3,12 +3,12 @@ import en from "i18n-iso-countries/langs/en.json";
 
 countries.registerLocale(en);
 
-export const countryOptions = Object.entries(
-  countries.getNames("en", { select: "official" })
-)
-  .map(([code, name]) => ({
-    value: name,
+export const countryOptions = Object.entries(countries.getNames('en')).map(
+  ([code, name]) => ({
+    value: code,
     label: name,
-    code,
-  }))
-  .sort((a, b) => a.label.localeCompare(b.label));
+  })
+);
+
+export const getCountryName = (code: string) =>
+  countries.getName(code, 'en') ?? code;

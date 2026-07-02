@@ -9,6 +9,7 @@ import CityMap from './CityMap';
 import CityFilters from './CityFilters';
 import CityModal from './CityModal';
 import CityDetailModal from './CityDetails';
+import { getCountryName } from '../../utils/countries.utils';
 
 interface Props {
   isAdmin: boolean;
@@ -52,7 +53,7 @@ export default function CitiesView({ isAdmin }: Props) {
       key:    'geography',
       render: (_, r) => (
         <span className="text-gray-600">
-          {r.country}
+          {getCountryName(r.countryCode)}
           {r.region && <span className="text-gray-400"> / {r.region}</span>}
         </span>
       ),
