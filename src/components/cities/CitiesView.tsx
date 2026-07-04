@@ -18,15 +18,15 @@ interface Props {
 export default function CitiesView({ isAdmin }: Props) {
   const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20 });
   const [modalVisible, setModalVisible] = useState(false);
-  const [editingCity, setEditingCity] = useState<any | null>(null);
+  const [editingCity, setEditingCity] = useState<City | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
-  const [selectedCity, setSelectedCity] = useState<any | null>(null);
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
 
   const { data, isLoading } = useCities(filters);
   const deleteMutation = useDeleteCity();
   const cities = data?.data ?? [];
 
-  const handleEdit = (city: any) => { setEditingCity(city); setModalVisible(true); };
+  const handleEdit = (city: City) => { setEditingCity(city); setModalVisible(true); };
 
   const handleDelete = async (id: number) => {
     try {
@@ -38,7 +38,7 @@ export default function CitiesView({ isAdmin }: Props) {
   };
 
   const handleModalClose = () => { setModalVisible(false); setEditingCity(null); };
-  const handleRowClick = (record: any) => { setSelectedCity(record); setDetailVisible(true); };
+  const handleRowClick = (record: City) => { setSelectedCity(record); setDetailVisible(true); };
 
   const columns: ColumnsType<City> = [
     {
@@ -104,7 +104,7 @@ export default function CitiesView({ isAdmin }: Props) {
       title: 'Actions',
       key: 'actions',
       width: 80,
-      render: (_: any, record: any) => (
+      render: (_: any, record: City) => (
         <div onClick={e => e.stopPropagation()}>
           <Dropdown
             menu={{

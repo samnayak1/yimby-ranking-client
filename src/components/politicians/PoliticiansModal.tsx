@@ -1,12 +1,17 @@
 import { useEffect } from 'react';
-import { Modal, Form, Input, Select, Switch, message } from 'antd';
+import { Modal, Form, Input, Select, Switch, message, Tag } from 'antd';
 import { useCreatePolitician, useUpdatePolitician } from '../../hooks/politicians.hook';
 import { countryOptions } from '../../utils/countries.utils';
+import { Divider, Table, Button } from "antd";
+import { useState } from "react";
+import type { Politician, Rating } from "../../types";
+import PoliticianMetricsModal from './PoliticiantMetricsModal';
+
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  editingPolitician?: any | null;
+  editingPolitician?: Politician | null;
 }
 
 const DESIGNATIONS = [
@@ -22,8 +27,13 @@ const LEANINGS = [
 export default function PoliticianModal({ visible, onClose, editingPolitician }: Props) {
   const [form] = Form.useForm();
   const createMutation = useCreatePolitician();
-  const updateMutation = useUpdatePolitician(editingPolitician?.id);
+  const updateMutation = useUpdatePolitician();
   const isEditing = !!editingPolitician;
+
+  const [ratingsModalOpen, setRatingsModalOpen] = useState(false);
+
+  const [editingRating, setEditingRating] =
+    useState<Rating | undefined>();
 
   useEffect(() => {
     if (visible && editingPolitician) {
@@ -45,16 +55,24 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
     try {
       const values = await form.validateFields();
 
-      // Convert boolean back to 0/1 for the API
-      const payload = { ...values, isInOffice: values.isInOffice ? 1 : 0 };
+      const payload = {
+        ...values,
+        isInOffice: values.isInOffice ? 1 : 0,
+      };
 
       if (isEditing) {
-        await updateMutation.mutateAsync(payload);
-        message.success('Politician updated successfully');
+        await updateMutation.mutateAsync({
+          id: editingPolitician!.id,
+          ...payload,
+        });
+
+        message.success("Politician updated successfully");
       } else {
         await createMutation.mutateAsync(payload);
-        message.success('Politician created successfully');
+
+        message.success("Politician created successfully");
       }
+
       onClose();
     } catch {
       message.error(isEditing ? 'Failed to update politician' : 'Failed to create politician');
@@ -93,22 +111,22 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
         </Form.Item>
 
         <Form.Item
-  name="nationalityCode"
-  label="Country"
-  rules={[
-    {
-      required: true,
-      message: "Please select a country",
-    },
-  ]}
->
-  <Select
-    showSearch
-    placeholder="Select a country"
-    options={countryOptions}
-    optionFilterProp="label"
-  />
-</Form.Item>
+          name="nationalityCode"
+          label="Country"
+          rules={[
+            {
+              required: true,
+              message: "Please select a country",
+            },
+          ]}
+        >
+          <Select
+            showSearch
+            placeholder="Select a country"
+            options={countryOptions}
+            optionFilterProp="label"
+          />
+        </Form.Item>
 
         <Form.Item name="isInOffice" label="Currently In Office" valuePropName="checked">
           <Switch />
@@ -118,6 +136,85 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
           <Input.TextArea rows={4} maxLength={1000} showCount placeholder="Additional notes about this politician." />
         </Form.Item>
       </Form>
+
+
+
+      {isEditing && (
+        <>
+          <Divider>Yearly Ratings</Divider>
+
+          <Table
+            size="small"
+            rowKey="year"
+            pagination={false}
+            dataSource={editingPolitician?.ratings ?? []}
+            columns={[
+              {
+                title: "Year",
+                dataIndex: "year",
+                sorter: (a, b) => b.year - a.year,
+                defaultSortOrder: "descend",
+                width: 120,
+              },
+              {
+                title: "Rating",
+                dataIndex: "rating",
+                width: 120,
+                render: (rating: number) => (
+                  <Tag
+                    color={
+                      rating >= 8
+                        ? "success"
+                        : rating <= 4
+                          ? "error"
+                          : "warning"
+                    }
+                  >
+                    <span className="text-lg font-bold">{rating}</span>
+                    <span className="text-[10px] ml-0.5 opacity-70">
+                      /10
+                    </span>
+                  </Tag>
+                ),
+              },
+              {
+                title: "",
+                width: 100,
+                render: (_, record) => (
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setEditingRating(record);
+                      setRatingsModalOpen(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                ),
+              },
+            ]}
+          />
+
+          <div className="flex justify-end mt-4">
+            <Button
+              type="primary"
+              onClick={() => {
+                setEditingRating(undefined);
+                setRatingsModalOpen(true);
+              }}
+            >
+              Add Year
+            </Button>
+          </div>
+        </>
+      )}
+
+      <PoliticianMetricsModal
+        open={ratingsModalOpen}
+        politicianId={editingPolitician?.id}
+        rating={editingRating}
+        onClose={() => setRatingsModalOpen(false)}
+      />
     </Modal>
   );
 }

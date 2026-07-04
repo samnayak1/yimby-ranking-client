@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { politiciansApi } from '../services/api.service';
-import type { PoliticianFilters} from '../types';
+import type { PoliticianFilters, UpsertPoliticianInput} from '../types';
 
 export const politicianKeys = {
   all: ['politicians'] as const,
@@ -49,13 +49,16 @@ export function useCreatePolitician() {
   });
 }
 
-export function useUpdatePolitician(id: number) {
+export function useUpdatePolitician() {
   const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: (data: any) => politiciansApi.update(id, data).then(res => res.data),
-    onSuccess: (data) => {
+    mutationFn: (input: UpsertPoliticianInput) =>
+      politiciansApi.update(input.id, input),
+
+    onSuccess: (data, variables) => {
       qc.invalidateQueries({ queryKey: politicianKeys.lists() });
-      qc.setQueryData(politicianKeys.detail(id), data);
+      qc.setQueryData(politicianKeys.detail(variables.id), data);
     },
   });
 }
@@ -70,14 +73,28 @@ export function useDeletePolitician() {
   });
 }
 
-export function useUpsertPoliticianRatings(id: number) {
+export interface UpsertPoliticianRatingInput {
+  id: number;
+  year: number;
+  rating: number;
+}
+
+export function useUpsertPoliticianRating() {
   const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: ({ year, rating }: { year: number; rating: number }) =>
-      politiciansApi.upsertRatings(id, { year, rating }).then(res => res.data),
-    onSuccess: (data) => {
-      qc.invalidateQueries({ queryKey: politicianKeys.lists() });
-      qc.setQueryData(politicianKeys.detail(id), data);
+    mutationFn: ({ id, ...body }: UpsertPoliticianRatingInput) =>
+      politiciansApi.upsertRatings(id, body),
+
+    onSuccess: (data, variables) => {
+      qc.invalidateQueries({
+        queryKey: politicianKeys.lists(),
+      });
+
+      qc.setQueryData(
+        politicianKeys.detail(variables.id),
+        data,
+      );
     },
   });
 }

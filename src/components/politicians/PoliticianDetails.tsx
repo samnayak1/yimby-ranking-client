@@ -77,7 +77,7 @@ export default function PoliticianDetails({ visible, onClose, politician }: Prop
         {politician.ratings?.length > 0 && (
           <>
             <Divider orientation="horizontal" className="text-sm">
-              <Space><CalendarOutlined /> Ranking History</Space>
+              <Space><CalendarOutlined /> Rating History</Space>
             </Divider>
             <div className="bg-gray-50 rounded-lg p-4">
               <Space direction="vertical" className="w-full">

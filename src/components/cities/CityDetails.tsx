@@ -46,11 +46,11 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
           <Descriptions.Item label="Country" span={2}>
             <Text strong>{getCountryName(city.countryCode)}</Text>
           </Descriptions.Item>
-          
+
           <Descriptions.Item label="Region">
             {city.region || '—'}
           </Descriptions.Item>
-          
+
           <Descriptions.Item label="Coordinates">
             {city.lat != null && city.lng != null ? (
               <Space>
@@ -76,7 +76,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
             <ScoreBadge ratings={city.ratings} />
           </Descriptions.Item>
 
-              {city.notes && (
+          {city.notes && (
             <Descriptions.Item label="Notes" span={2}>
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
                 <Paragraph className="whitespace-pre-wrap text-gray-700 m-0">
@@ -92,23 +92,77 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
             <Divider orientation="horizontal" className="text-sm">
               <Space>
                 <CalendarOutlined />
-                Ranking History
+                Rating History
               </Space>
             </Divider>
             <div className="bg-gray-50 rounded-lg p-4">
               <Space direction="vertical" className="w-full">
                 {city.ratings.map((rating) => (
-                  <div key={rating.year} className="flex items-center justify-between">
-                    <Text strong>{rating.year}</Text>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full"
-                        style={{ 
-                          backgroundColor: rating.rating >= 8 ? '#22c55e' : 
-                                           rating.rating >= 5 ? '#eab308' : '#ef4444' 
-                        }}
-                      />
-                      <Text className="font-semibold">{rating.rating}/10</Text>
+                  <div
+                    key={rating.year}
+                    className="rounded-lg border border-gray-200 bg-white p-4"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <Text strong className="text-base">
+                        {rating.year}
+                      </Text>
+
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{
+                            backgroundColor:
+                              rating.rating >= 8
+                                ? "#22c55e"
+                                : rating.rating >= 5
+                                  ? "#eab308"
+                                  : "#ef4444",
+                          }}
+                        />
+                        <Text strong>{rating.rating}/10</Text>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <Text type="secondary">Permits Issued</Text>
+                        <Text>{rating.permitsIssued ?? "—"}</Text>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <Text type="secondary">Permits / 1k</Text>
+                        <Text>
+                          {rating.permitsPer1000Residents?.toFixed(2) ?? "—"}
+                        </Text>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <Text type="secondary">Housing Starts</Text>
+                        <Text>{rating.housingStarts ?? "—"}</Text>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <Text type="secondary">Homes Completed</Text>
+                        <Text>{rating.homesCompleted ?? "—"}</Text>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <Text type="secondary">Avg Permit Time</Text>
+                        <Text>
+                          {rating.averagePermitDays != null
+                            ? `${rating.averagePermitDays} days`
+                            : "—"}
+                        </Text>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <Text type="secondary">Population</Text>
+                        <Text>
+                          {rating.population != null
+                            ? new Intl.NumberFormat().format(rating.population)
+                            : "—"}
+                        </Text>
+                      </div>
                     </div>
                   </div>
                 ))}

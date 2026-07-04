@@ -26,15 +26,15 @@ interface Props {
 export default function PoliticiansTable({ isAdmin }: Props) {
   const [filters,              setFilters]              = useState<Filters>({ page: 1, limit: 20 });
   const [modalVisible,         setModalVisible]         = useState(false);
-  const [editingPolitician,    setEditingPolitician]    = useState<any | null>(null);
+  const [editingPolitician,    setEditingPolitician]    = useState<Politician | null>(null);
   const [detailVisible,        setDetailVisible]        = useState(false);
-  const [selectedPolitician,   setSelectedPolitician]   = useState<any | null>(null);
+  const [selectedPolitician,   setSelectedPolitician]   = useState<Politician | null>(null);
 
   const { data, isLoading } = usePoliticians(filters);
   const deleteMutation      = useDeletePolitician();
   const politicians         = data?.data ?? [];
 
-  const handleEdit = (p: any) => { setEditingPolitician(p); setModalVisible(true); };
+  const handleEdit = (p: Politician) => { setEditingPolitician(p); setModalVisible(true); };
 
   const handleDelete = async (id: number) => {
     try {
