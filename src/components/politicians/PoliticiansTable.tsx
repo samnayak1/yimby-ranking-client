@@ -47,7 +47,7 @@ export default function PoliticiansTable({ isAdmin }: Props) {
 
   const handleModalClose = () => { setModalVisible(false); setEditingPolitician(null); };
 
-  const handleRowClick = (record: any) => { setSelectedPolitician(record); setDetailVisible(true); };
+  const handleRowClick = (record: Politician) => { setSelectedPolitician(record); setDetailVisible(true); };
 
   const columns: ColumnsType<Politician> = [
     {
@@ -58,7 +58,7 @@ export default function PoliticiansTable({ isAdmin }: Props) {
       render:    name => <span className="font-semibold text-gray-800">{name}</span>,
     },
     {
-      title:     'Designation',
+      title:     'Designation / Running For',
       dataIndex: 'designation',
       key:       'designation',
       render:    v => v ?? <span className="text-gray-400">—</span>,
@@ -86,10 +86,10 @@ export default function PoliticiansTable({ isAdmin }: Props) {
         : <span className="text-gray-400">—</span>,
     },
     {
-      title:  'YIMBY Score',
-      key:    'ranking',
-      render: (_, r) => <ScoreBadge rankings={r.rankings} />,
-      sorter: (a, b) => (a.rankings[0]?.ranking ?? 0) - (b.rankings[0]?.ranking ?? 0),
+      title:  'Rating',
+      key:    'rating',
+      render: (_, r) => <ScoreBadge ratings={r.ratings} />,
+      sorter: (a, b) => (a.ratings[0]?.rating ?? 0) - (b.ratings[0]?.rating ?? 0),
     },
     {
       title:  'Notes',

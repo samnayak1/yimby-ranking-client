@@ -16,17 +16,17 @@ interface Props {
 }
 
 export default function CitiesView({ isAdmin }: Props) {
-  const [filters,        setFilters]        = useState<Filters>({ page: 1, limit: 20 });
-  const [modalVisible,   setModalVisible]   = useState(false);
-  const [editingCity,    setEditingCity]     = useState<any | null>(null);
-  const [detailVisible,  setDetailVisible]  = useState(false);
-  const [selectedCity,   setSelectedCity]   = useState<any | null>(null);
+  const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20 });
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingCity, setEditingCity] = useState<any | null>(null);
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [selectedCity, setSelectedCity] = useState<any | null>(null);
 
   const { data, isLoading } = useCities(filters);
-  const deleteMutation      = useDeleteCity();
-  const cities              = data?.data ?? [];
+  const deleteMutation = useDeleteCity();
+  const cities = data?.data ?? [];
 
-  const handleEdit  = (city: any) => { setEditingCity(city); setModalVisible(true); };
+  const handleEdit = (city: any) => { setEditingCity(city); setModalVisible(true); };
 
   const handleDelete = async (id: number) => {
     try {
@@ -38,19 +38,19 @@ export default function CitiesView({ isAdmin }: Props) {
   };
 
   const handleModalClose = () => { setModalVisible(false); setEditingCity(null); };
-  const handleRowClick   = (record: any) => { setSelectedCity(record); setDetailVisible(true); };
+  const handleRowClick = (record: any) => { setSelectedCity(record); setDetailVisible(true); };
 
   const columns: ColumnsType<City> = [
     {
-      title:     'City',
+      title: 'City',
       dataIndex: 'name',
-      key:       'name',
-      sorter:    (a, b) => a.name.localeCompare(b.name),
-      render:    name => <span className="font-semibold text-gray-800">{name}</span>,
+      key: 'name',
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      render: name => <span className="font-semibold text-gray-800">{name}</span>,
     },
     {
-      title:  'Country / Region',
-      key:    'geography',
+      title: 'Country / Region',
+      key: 'geography',
       render: (_, r) => (
         <span className="text-gray-600">
           {getCountryName(r.countryCode)}
@@ -59,58 +59,64 @@ export default function CitiesView({ isAdmin }: Props) {
       ),
     },
     {
-      title:  'Median Price',
-      key:    'price',
+      title: 'Median Price',
+      key: 'price',
       sorter: (a, b) => (a.medianHousePrice ?? 0) - (b.medianHousePrice ?? 0),
       render: (_, r) => r.medianHousePrice != null
         ? new Intl.NumberFormat('en-US', {
-            style:               'currency',
-            currency:            r.currency ?? 'USD',
-            maximumFractionDigits: 0,
-          }).format(r.medianHousePrice)
+          style: 'currency',
+          currency: r.currency ?? 'USD',
+          maximumFractionDigits: 0,
+        }).format(r.medianHousePrice)
         : <span className="text-gray-400">—</span>,
     },
     {
-      title:  'Currency',
-      key:    'currency',
+      title: 'Currency',
+      key: 'currency',
       render: (_, r) => r.currency ?? <span className="text-gray-400">—</span>,
     },
     {
-      title:  'YIMBY Score',
-      key:    'ranking',
-      render: (_, r) => <ScoreBadge rankings={r.rankings} />,
-      sorter: (a, b) => (a.rankings[0]?.ranking ?? 0) - (b.rankings[0]?.ranking ?? 0),
+      title: 'Score',
+      key: 'rating',
+      render: (_, r) => <ScoreBadge ratings={r.ratings} />,
+      sorter: (a, b) => (a.ratings[0]?.rating ?? 0) - (b.ratings[0]?.rating ?? 0),
     },
     {
-      title:  'Notes',
-      key:    'notes',
-      render: (_, r) => r.notes
-        ? (
-          <Tooltip title={r.notes} overlayStyle={{ maxWidth: 400 }} placement="topLeft">
-            <div className="text-gray-500 text-sm cursor-help line-clamp-2 max-w-75">
+      title: 'Notes',
+      key: 'notes',
+      width: 320,
+      render: (_, r) =>
+        r.notes ? (
+          <Tooltip
+            title={r.notes}
+            overlayStyle={{ maxWidth: 500 }}
+            placement="topLeft"
+          >
+            <div className="text-gray-500 text-sm cursor-help line-clamp-2 max-w-md">
               {r.notes}
             </div>
           </Tooltip>
-        )
-        : <span className="text-gray-400">—</span>,
+        ) : (
+          <span className="text-gray-400">—</span>
+        ),
     },
     ...(isAdmin ? [{
-      title:  'Actions',
-      key:    'actions',
-      width:  80,
+      title: 'Actions',
+      key: 'actions',
+      width: 80,
       render: (_: any, record: any) => (
         <div onClick={e => e.stopPropagation()}>
           <Dropdown
             menu={{
               items: [
                 {
-                  key:     'edit',
-                  label:   'Edit',
-                  icon:    <EditOutlined />,
+                  key: 'edit',
+                  label: 'Edit',
+                  icon: <EditOutlined />,
                   onClick: () => handleEdit(record),
                 },
                 {
-                  key:   'delete',
+                  key: 'delete',
                   label: (
                     <Popconfirm
                       title="Delete City"
@@ -123,7 +129,7 @@ export default function CitiesView({ isAdmin }: Props) {
                       <span>Delete</span>
                     </Popconfirm>
                   ),
-                  icon:   <DeleteOutlined className="text-red-500" />,
+                  icon: <DeleteOutlined className="text-red-500" />,
                   danger: true,
                 },
               ],
@@ -165,9 +171,9 @@ export default function CitiesView({ isAdmin }: Props) {
             rowKey="id"
             loading={isLoading}
             pagination={{
-              current:  filters.page  || 1,
+              current: filters.page || 1,
               pageSize: filters.limit || 20,
-              total:    data?.pagination?.total ?? 0,
+              total: data?.pagination?.total ?? 0,
               showSizeChanger: true,
               showTotal: total => `${total} cities`,
               onChange: (page, limit) => setFilters({ ...filters, page, limit }),

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { citiesApi } from '../services/api.service';
-import type {  CityFilters } from '../types';
+import type {  CityFilters, UpsertCityRatingInput } from '../types';
 
 export const cityKeys = {
   all: ['cities'] as const,
@@ -22,6 +22,7 @@ interface UpdateCityInput {
   lat?: number;
   lng?: number;
 }
+
 
 export function useCities(filters: CityFilters = {}) {
   return useQuery({
@@ -83,14 +84,16 @@ export function useDeleteCity() {
   });
 }
 
-export function useUpsertCityRanking(id: number) {
+export function useUpsertCityRatings() {
   const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: ({ year, ranking }: { year: number; ranking: number }) =>
-      citiesApi.upsertRanking(id, year, ranking).then(res => res.data),
-    onSuccess: (data) => {
+    mutationFn: ({ id, ...body }: UpsertCityRatingInput) =>
+      citiesApi.upsertRatings(id, body).then((res) => res.data),
+
+    onSuccess: (_, variables) => {
       qc.invalidateQueries({ queryKey: cityKeys.lists() });
-      qc.setQueryData(cityKeys.detail(id), data);
+      qc.invalidateQueries({ queryKey: cityKeys.detail(variables.id) });
     },
   });
 }

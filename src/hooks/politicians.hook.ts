@@ -70,11 +70,11 @@ export function useDeletePolitician() {
   });
 }
 
-export function useUpsertPoliticianRanking(id: number) {
+export function useUpsertPoliticianRatings(id: number) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ year, ranking }: { year: number; ranking: number }) =>
-      politiciansApi.upsertRanking(id, year, ranking).then(res => res.data),
+    mutationFn: ({ year, rating }: { year: number; rating: number }) =>
+      politiciansApi.upsertRatings(id, { year, rating }).then(res => res.data),
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: politicianKeys.lists() });
       qc.setQueryData(politicianKeys.detail(id), data);

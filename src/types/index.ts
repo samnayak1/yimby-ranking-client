@@ -1,7 +1,66 @@
-export interface Ranking {
+export interface Rating {
   year:    number;
-  ranking: number;
+  rating: number;
 }
+
+export interface CityRating {
+  year: number;
+
+  rating: number;
+  permitsIssued?: number;
+  permitsPer1000Residents?: number;
+  housingStarts?: number;
+  homesCompleted?: number;
+  averagePermitDays?: number;
+  population?: number;
+}
+
+export interface UpsertCityRatingBody {
+  year: number;
+
+  rating?: number;
+  permitsIssued?: number;
+  permitsPer1000Residents?: number;
+  housingStarts?: number;
+  homesCompleted?: number;
+  averagePermitDays?: number;
+  population?: number;
+}
+export interface UpsertCityRatingInput extends UpsertCityRatingBody {
+  id: number;
+}
+
+export interface UpsertPoliticianBody {
+  name: string;
+  designation?: string | null;
+  isInOffice: number;
+  nationalityCode: string;
+  politicalLeaning?: string | null;
+  notes?: string | null;
+
+}
+export interface UpsertPoliticianInput extends UpsertPoliticianBody {
+  id: number;
+}
+
+export interface UpsertCityBody {
+  name: string;
+  countryCode: string;
+  region?: string | null;
+  medianHousePrice?: number | null;
+  currency?: string | null;
+  notes?: string | null;
+  lat?: number | null;
+  lng?: number | null;
+}
+
+export interface UpsertCityInput extends UpsertCityBody {
+  id: number;
+}
+
+
+
+
 
 export interface Politician {
   id:              number;
@@ -11,7 +70,7 @@ export interface Politician {
   nationalityCode:     string | null;
   politicalLeaning: string | null;
   notes:           string | null;
-  rankings:        Ranking[];
+  ratings:        Rating[];
 }
 
 export interface City {
@@ -24,7 +83,7 @@ export interface City {
   notes:            string | null;
   lat:              number | null;
   lng:              number | null;
-  rankings:         Ranking[];
+  ratings:         CityRating[];
 }
 
 export interface AuthUser {
@@ -84,3 +143,9 @@ export type PoliticianFilterOptions = {
   politicalLeanings: string[];
   nationalities: string[];
 }
+
+
+export interface ApiResponse<T> {
+  data: T;
+}
+

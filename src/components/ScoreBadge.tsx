@@ -1,51 +1,31 @@
-import type { Ranking } from "../types";
-
+import { Tag } from "antd";
+import type { Rating } from "../types";
 
 interface Props {
-  rankings: Ranking[];
+  ratings: Rating[];
 }
 
-function scoreColor(score: number): string {
-  if (score >= 8) return '#2da066';
-  if (score >= 5) return '#d97706';
-  return '#dc2626';
-}
+export default function ScoreBadge({ ratings }: Props) {
+  if (!ratings.length) {
+    return <span className="text-gray-400">—</span>;
+  }
 
-export default function ScoreBadge({ rankings }: Props) {
-  if (!rankings.length) return <span className="text-gray-400 text-sm">—</span>;
+  const latest = ratings.reduce((a, b) => (a.year > b.year ? a : b));
 
-  const sorted  = [...rankings].sort((a, b) => b.year - a.year);
-  const latest  = sorted[0];
-  const color   = scoreColor(latest.ranking);
-  const pct     = (latest.ranking / 10) * 100;
+  let color: string;
+
+  if (latest.rating >= 8) {
+    color = "success";
+  } else if (latest.rating <= 4) {
+    color = "error";
+  } else {
+    color = "warning";
+  }
 
   return (
-    <div className="flex items-center gap-2 min-w-25">
-      <span
-        className="font-mono font-bold text-base w-5 text-right"
-        style={{ color }}
-      >
-        {latest.ranking}
-      </span>
-      <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${pct}%`, backgroundColor: color }}
-        />
-      </div>
-      {sorted.length > 1 && (
-        <select
-          className="text-xs text-gray-400 bg-transparent border-none outline-none cursor-pointer"
-          defaultValue={latest.year}
-          title="Historical scores"
-        >
-          {sorted.map(r => (
-            <option key={r.year} value={r.year}>
-              {r.year}: {r.ranking}/10
-            </option>
-          ))}
-        </select>
-      )}
-    </div>
-  );
+  <Tag color={color} className="font-semibold px-2 py-0.5">
+    <span className="text-xl font-bold">{latest.rating}</span>
+    <span className="text-[10px] ml-0.5 opacity-70">/10</span>
+  </Tag>
+);
 }

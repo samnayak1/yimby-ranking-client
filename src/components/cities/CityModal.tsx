@@ -7,11 +7,15 @@ import {
   Select,
   Button,
   message,
+  Divider,
+  Space,
+  Table,
 } from 'antd';
 import { countryOptions } from '../../utils/countries.utils';
 import { useCreateCity, useUpdateCity } from '../../hooks/cities.hook';
 import LocationPickerModal from './LocationPickerModal';
-import type { City } from '../../types';
+import type { City, CityRating } from '../../types';
+import CityMetricsModal from './CityMetricsModal';
 
 interface CityModalProps {
   visible: boolean;
@@ -32,6 +36,11 @@ export default function CityModal({
 
   const createMutation = useCreateCity();
   const updateMutation = useUpdateCity();
+
+  const [metricsModalOpen, setMetricsModalOpen] = useState(false);
+
+  const [editingMetrics, setEditingMetrics] =
+    useState<CityRating | undefined>();
 
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
 
@@ -54,32 +63,32 @@ export default function CityModal({
     }
   }, [visible, editingCity, form]);
 
- const handleSubmit = async () => {
-  try {
-    const values = await form.validateFields();
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
 
-    if (isEditing) {
-      await updateMutation.mutateAsync({
-        id: editingCity!.id,
-        ...values,
-      });
+      if (isEditing) {
+        await updateMutation.mutateAsync({
+          id: editingCity!.id,
+          ...values,
+        });
 
-      message.success('City updated successfully');
-    } else {
-      await createMutation.mutateAsync(values);
+        message.success('City updated successfully');
+      } else {
+        await createMutation.mutateAsync(values);
 
-      message.success('City created successfully');
+        message.success('City created successfully');
+      }
+
+      onClose();
+    } catch {
+      message.error(
+        isEditing
+          ? 'Failed to update city'
+          : 'Failed to create city'
+      );
     }
-
-    onClose();
-  } catch {
-    message.error(
-      isEditing
-        ? 'Failed to update city'
-        : 'Failed to create city'
-    );
-  }
-};
+  };
 
   return (
     <>
@@ -213,7 +222,112 @@ export default function CityModal({
           >
             <Input.TextArea rows={3} />
           </Form.Item>
+
+
         </Form>
+
+        {isEditing && (
+          <>
+            <Divider>Yearly Metrics</Divider>
+
+            <Table
+              size="small"
+              rowKey="year"
+              pagination={false}
+              scroll={{ x: 1200 }}
+              dataSource={editingCity?.ratings ?? []}
+              columns={[
+                {
+                  title: "Year",
+                  dataIndex: "year",
+                  width: 80,
+                  sorter: (a, b) => b.year - a.year,
+                  defaultSortOrder: "descend",
+                },
+                {
+                  title: "Score",
+                  dataIndex: "rating",
+                  width: 110,
+                  render: (value) => (
+                    <strong>{value}/10</strong>
+                  ),
+                },
+                {
+                  title: "Permits",
+                  dataIndex: "permitsIssued",
+                  width: 110,
+                  render: (v) => v ?? "—",
+                },
+                {
+                  title: "Permits / 1k",
+                  dataIndex: "permitsPer1000Residents",
+                  width: 130,
+                  render: (v) => v?.toFixed(2) ?? "—",
+                },
+                {
+                  title: "Housing Starts",
+                  dataIndex: "housingStarts",
+                  width: 130,
+                  render: (v) => v ?? "—",
+                },
+                {
+                  title: "Homes Completed",
+                  dataIndex: "homesCompleted",
+                  width: 150,
+                  render: (v) => v ?? "—",
+                },
+                {
+                  title: "Avg Permit Days",
+                  dataIndex: "averagePermitDays",
+                  width: 140,
+                  render: (v) => (v ? `${v} days` : "—"),
+                },
+                {
+                  title: "Population",
+                  dataIndex: "population",
+                  width: 140,
+                  render: (v) =>
+                    v != null
+                      ? new Intl.NumberFormat().format(v)
+                      : "—",
+                },
+                {
+                  title: "Actions",
+                  key: "actions",
+                  fixed: "right",
+                  width: 100,
+                  render: (_, record) => (
+                    <Space>
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          setEditingMetrics(record);
+                          setMetricsModalOpen(true);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </Space>
+                  ),
+                },
+              ]}
+            />
+
+            <div className="flex justify-end mt-4">
+              <Button
+                type="primary"
+                onClick={() => {
+                  setEditingMetrics(undefined);
+                  setMetricsModalOpen(true);
+                }}
+              >
+                Add Year
+              </Button>
+            </div>
+          </>
+        )}
+
+
       </Modal>
 
       <LocationPickerModal
@@ -232,6 +346,15 @@ export default function CityModal({
 
         }}
       />
+
+     {isEditing && (
+  <CityMetricsModal
+    open={metricsModalOpen}
+    cityId={editingCity.id}
+    rating={editingMetrics}
+    onClose={() => setMetricsModalOpen(false)}
+  />
+)}
     </>
   );
 }

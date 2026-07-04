@@ -2,13 +2,15 @@ import { Modal, Descriptions, Tag, Space, Typography, Divider } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, DollarOutlined, GlobalOutlined } from '@ant-design/icons';
 import ScoreBadge from '../ScoreBadge';
 import Paragraph from 'antd/es/typography/Paragraph';
+import type { City } from '../../types';
+import { getCountryName } from '../../utils/countries.utils';
 
 const { Text } = Typography;
 
 interface CityDetailModalProps {
   visible: boolean;
   onClose: () => void;
-  city: any | null;
+  city: City | null;
 }
 
 export default function CityDetailModal({ visible, onClose, city }: CityDetailModalProps) {
@@ -30,7 +32,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
           <span className="text-xl font-semibold">{city.name}</span>
           <Tag color="blue" className="rounded-full">
             <GlobalOutlined className="mr-1" />
-            {city.country}
+            {getCountryName(city.countryCode)}
           </Tag>
         </Space>
       }
@@ -42,7 +44,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
       <div className="py-2">
         <Descriptions column={2} bordered size="middle">
           <Descriptions.Item label="Country" span={2}>
-            <Text strong>{city.country}</Text>
+            <Text strong>{getCountryName(city.countryCode)}</Text>
           </Descriptions.Item>
           
           <Descriptions.Item label="Region">
@@ -62,7 +64,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
             <Space>
               <DollarOutlined className="text-green-600" />
               <Text strong className="text-lg">
-                {formatPrice(city.medianHousePrice, city.currency)}
+                {city.medianHousePrice && city.currency ? formatPrice(city.medianHousePrice, city.currency) : '—'}
               </Text>
               {city.currency && (
                 <Text type="secondary">({city.currency})</Text>
@@ -71,7 +73,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
           </Descriptions.Item>
 
           <Descriptions.Item label="YIMBY Score" span={2}>
-            <ScoreBadge rankings={city.rankings} />
+            <ScoreBadge ratings={city.ratings} />
           </Descriptions.Item>
 
               {city.notes && (
@@ -85,7 +87,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
           )}
         </Descriptions>
 
-        {city.rankings && city.rankings.length > 0 && (
+        {city.ratings && city.ratings.length > 0 && (
           <>
             <Divider orientation="horizontal" className="text-sm">
               <Space>
@@ -95,18 +97,18 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
             </Divider>
             <div className="bg-gray-50 rounded-lg p-4">
               <Space direction="vertical" className="w-full">
-                {city.rankings.map((ranking: any) => (
-                  <div key={ranking.year} className="flex items-center justify-between">
-                    <Text strong>{ranking.year}</Text>
+                {city.ratings.map((rating) => (
+                  <div key={rating.year} className="flex items-center justify-between">
+                    <Text strong>{rating.year}</Text>
                     <div className="flex items-center gap-2">
                       <div 
                         className="w-3 h-3 rounded-full"
                         style={{ 
-                          backgroundColor: ranking.ranking >= 8 ? '#22c55e' : 
-                                           ranking.ranking >= 5 ? '#eab308' : '#ef4444' 
+                          backgroundColor: rating.rating >= 8 ? '#22c55e' : 
+                                           rating.rating >= 5 ? '#eab308' : '#ef4444' 
                         }}
                       />
-                      <Text className="font-semibold">{ranking.ranking}/10</Text>
+                      <Text className="font-semibold">{rating.rating}/10</Text>
                     </div>
                   </div>
                 ))}

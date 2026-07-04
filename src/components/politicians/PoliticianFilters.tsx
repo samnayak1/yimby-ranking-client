@@ -74,7 +74,7 @@ export default function PoliticianFiltersComponent({ filters, onFilterChange }: 
 
         <Col xs={24} sm={12} md={8} lg={6}>
           <Select
-            placeholder="Designation"
+            placeholder="Designation/Running for"
             value={filters.designation}
             onChange={v => handleChange('designation', v)}
             loading={isLoading && !data}

@@ -76,7 +76,7 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
           <Input placeholder="Enter politician name" />
         </Form.Item>
 
-        <Form.Item name="designation" label="Designation" rules={[{ required: true, message: 'Designation is required' }]}>
+        <Form.Item name="designation" label="Designation / Running For" rules={[{ required: true, message: 'Designation is required' }]}>
           <Select placeholder="Select designation" allowClear showSearch>
             {DESIGNATIONS.map(d => (
               <Select.Option key={d} value={d}>{d}</Select.Option>
@@ -93,22 +93,22 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
         </Form.Item>
 
         <Form.Item
-          name="country"
-          label="Country"
-          rules={[
-            {
-              required: true,
-              message: "Please select a country",
-            },
-          ]}
-        >
-          <Select
-            showSearch
-            placeholder="Select a country"
-            options={countryOptions}
-            optionFilterProp="label"
-          />
-        </Form.Item>
+  name="nationalityCode"
+  label="Country"
+  rules={[
+    {
+      required: true,
+      message: "Please select a country",
+    },
+  ]}
+>
+  <Select
+    showSearch
+    placeholder="Select a country"
+    options={countryOptions}
+    optionFilterProp="label"
+  />
+</Form.Item>
 
         <Form.Item name="isInOffice" label="Currently In Office" valuePropName="checked">
           <Switch />

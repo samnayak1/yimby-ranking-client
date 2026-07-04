@@ -62,7 +62,7 @@ export default function CityMap({ cities }: Props) {
     cities
       .filter(c => c.lat != null && c.lng != null)
       .forEach(c => {
-        const latest = c.rankings[0];
+        const latest = c.ratings[0];
         const price  = c.medianHousePrice != null
           ? new Intl.NumberFormat('en-US', {
               style:    'currency',
@@ -71,7 +71,7 @@ export default function CityMap({ cities }: Props) {
             }).format(c.medianHousePrice)
           : '—';
 
-        L.marker([c.lat!, c.lng!], { icon: makeIcon(latest?.ranking) })
+        L.marker([c.lat!, c.lng!], { icon: makeIcon(latest?.rating) })
           .addTo(map)
           .bindPopup(`
             <div style="font-family:Inter,sans-serif;min-width:160px">
@@ -82,8 +82,8 @@ export default function CityMap({ cities }: Props) {
               </div>
               <div style="font-size:12px">
                 <span style="color:#9ca3af">YIMBY score:</span>
-                <span style="color:${scoreColor(latest?.ranking)};font-weight:700">
-                  ${latest?.ranking ?? '—'}/10
+                <span style="color:${scoreColor(latest?.rating)};font-weight:700">
+                  ${latest?.rating ?? '—'}/10
                 </span>
               </div>
               ${c.notes ? `<div style="margin-top:6px;font-size:11px;color:#9ca3af;font-style:italic">${c.notes.slice(0, 80)}${c.notes.length > 80 ? '…' : ''}</div>` : ''}

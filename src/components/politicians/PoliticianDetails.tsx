@@ -2,6 +2,8 @@ import { Modal, Descriptions, Tag, Space, Typography, Divider } from 'antd';
 import { CalendarOutlined } from '@ant-design/icons';
 import ScoreBadge from '../ScoreBadge';
 import Paragraph from 'antd/es/typography/Paragraph';
+import type { Politician } from '../../types';
+import { getCountryName } from '../../utils/countries.utils';
 
 const { Text } = Typography;
 
@@ -18,7 +20,7 @@ const LEANING_COLORS: Record<string, string> = {
 interface Props {
   visible:    boolean;
   onClose:    () => void;
-  politician: any | null;
+  politician: Politician | null;
 }
 
 export default function PoliticianDetails({ visible, onClose, politician }: Props) {
@@ -54,11 +56,11 @@ export default function PoliticianDetails({ visible, onClose, politician }: Prop
           </Descriptions.Item>
 
           <Descriptions.Item label="Nationality">
-            {politician.nationality || '—'}
+            {politician.nationalityCode?getCountryName(politician.nationalityCode) : '—'}
           </Descriptions.Item>
 
           <Descriptions.Item label="YIMBY Score" span={2}>
-            <ScoreBadge rankings={politician.rankings} />
+            <ScoreBadge ratings={politician.ratings} />
           </Descriptions.Item>
 
           {politician.notes && (
@@ -72,26 +74,26 @@ export default function PoliticianDetails({ visible, onClose, politician }: Prop
           )}
         </Descriptions>
 
-        {politician.rankings?.length > 0 && (
+        {politician.ratings?.length > 0 && (
           <>
             <Divider orientation="horizontal" className="text-sm">
               <Space><CalendarOutlined /> Ranking History</Space>
             </Divider>
             <div className="bg-gray-50 rounded-lg p-4">
               <Space direction="vertical" className="w-full">
-                {politician.rankings.map((r: any) => (
+                {politician.ratings.map((r) => (
                   <div key={r.year} className="flex items-center justify-between">
                     <Text strong>{r.year}</Text>
                     <div className="flex items-center gap-2">
                       <div
                         className="w-3 h-3 rounded-full"
                         style={{
-                          backgroundColor: r.ranking >= 8 ? '#22c55e'
-                                         : r.ranking >= 5 ? '#eab308'
+                          backgroundColor: r.rating >= 8 ? '#22c55e'
+                                         : r.rating >= 5 ? '#eab308'
                                          : '#ef4444',
                         }}
                       />
-                      <Text className="font-semibold">{r.ranking}/10</Text>
+                      <Text className="font-semibold">{r.rating}/10</Text>
                     </div>
                   </div>
                 ))}

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getAccessToken } from './auth.service';
-import type { City, PaginatedResponse, Politician } from '../types';
+import type { ApiResponse, City, PaginatedResponse, Politician, UpsertCityBody, UpsertCityInput, UpsertCityRatingBody, UpsertPoliticianBody, UpsertPoliticianInput } from '../types';
 
 const client = axios.create({
     baseURL: '/api',
@@ -23,25 +23,83 @@ client.interceptors.response.use(
 );
 
 
-
 export const politiciansApi = {
-    getAll: (params?: any) => client.get<PaginatedResponse<Politician>>('/politicians', { params }),
-    getById: (id: number) => client.get<{ data: any }>(`/politicians/${id}`).then(r => r.data),
-    create: (body: any) => client.post<{ data: any }>('/politicians', body).then(r => r.data),
-    update: (id: number, body: any) => client.patch<{ data: any }>(`/politicians/${id}`, body).then(r => r.data),
-    delete: (id: number) => client.delete(`/politicians/${id}`),
-    upsertRanking: (id: number, year: number, ranking: number) => client.put<{ data: any }>(`/politicians/${id}/rankings`, { year, ranking }).then(r => r.data),
-    getFilterOptions: () => client.get<{ designations: string[]; politicalLeanings: string[]; nationalities: string[]; }>('/politicians/filter/filter-options'),
+  getAll: (params?: any) =>
+    client.get<PaginatedResponse<Politician>>('/politicians', { params }),
+
+  getById: (id: number) =>
+    client
+      .get<ApiResponse<Politician>>(`/politicians/${id}`)
+      .then((r) => r.data),
+
+  create: (body: UpsertPoliticianBody) =>
+    client
+      .post<ApiResponse<Politician>>('/politicians', body)
+      .then((r) => r.data),
+
+  update: (id: number, body: UpsertPoliticianInput) =>
+    client
+      .patch<ApiResponse<Politician>>(`/politicians/${id}`, body)
+      .then((r) => r.data),
+
+  delete: (id: number) =>
+    client.delete<void>(`/politicians/${id}`),
+
+  upsertRatings: (
+id: number, body: any,
+  ) =>
+    client
+      .put<ApiResponse<Politician>>(
+        `/politicians/${id}/ratings`,
+        body,
+      )
+      .then((r) => r.data),
+
+  getFilterOptions: () =>
+    client.get<{
+      designations: string[];
+      politicalLeanings: string[];
+      nationalities: string[];
+    }>('/politicians/filter/filter-options'),
 };
 
-
-
 export const citiesApi = {
-    getAll: (params?: any) => client.get<PaginatedResponse<City>>('/cities', { params }),
-    getById: (id: number) => client.get<{ data: City }>(`/cities/${id}`).then(r => r.data),
-    create: (body: any) => client.post<{ data: any }>('/cities', body).then(r => r.data),
-    update: (id: number, body: any) => client.patch<{ data: any }>(`/cities/${id}`, body).then(r => r.data),
-    delete: (id: number) => client.delete(`/cities/${id}`),
-    upsertRanking: (id: number, year: number, ranking: number) => client.put<{ data: any }>(`/cities/${id}/rankings`, { year, ranking }).then(r => r.data),
-    getFilterOptions: () => client.get<{ countries: string[], regions: string[], currencies: string[] }>('/cities/filter/filter-options'),
+  getAll: (params?: any) =>
+    client.get<PaginatedResponse<City>>('/cities', { params }),
+
+  getById: (id: number) =>
+    client
+      .get<ApiResponse<City>>(`/cities/${id}`)
+      .then((r) => r.data),
+
+  create: (body: UpsertCityBody) =>
+    client
+      .post<ApiResponse<City>>('/cities', body)
+      .then((r) => r.data),
+
+  update: (id: number, body: UpsertCityInput) =>
+    client
+      .patch<ApiResponse<City>>(`/cities/${id}`, body)
+      .then((r) => r.data),
+
+  delete: (id: number) =>
+    client.delete<void>(`/cities/${id}`),
+
+  upsertRatings: (
+    id: number,
+    body: UpsertCityRatingBody,
+  ) =>
+    client
+      .put<ApiResponse<City>>(
+        `/cities/${id}/ratings`,
+        body,
+      )
+      .then((r) => r.data),
+
+  getFilterOptions: () =>
+    client.get<{
+      countries: string[];
+      regions: string[];
+      currencies: string[];
+    }>('/cities/filter/filter-options'),
 };

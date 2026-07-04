@@ -10,12 +10,6 @@ interface SelectedLocation {
     region: string;
     displayName: string;
 }
-
-
-
-
-
-
 interface Props {
     open: boolean;
     initialLat?: number;
