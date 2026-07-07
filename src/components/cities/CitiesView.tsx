@@ -170,6 +170,7 @@ export default function CitiesView({ isAdmin }: Props) {
             dataSource={cities}
             rowKey="id"
             loading={isLoading}
+         //   scroll={{ y: 600 }}
             pagination={{
               current: filters.page || 1,
               pageSize: filters.limit || 20,

@@ -171,6 +171,7 @@ export default function PoliticiansTable({ isAdmin }: Props) {
         dataSource={politicians}
         rowKey="id"
         loading={isLoading}
+     //    scroll={{ y: 600 }}
         pagination={{
           current:  filters.page  || 1,
           pageSize: filters.limit || 20,
