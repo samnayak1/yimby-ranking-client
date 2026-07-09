@@ -42,9 +42,11 @@ export function useCity(id: number) {
 export function useCityFilterOptions() {
   return useQuery({
     queryKey: cityKeys.filterOptions(),
-    queryFn: () => citiesApi.getFilterOptions().then(res => res.data),
+    queryFn: () => {
+      return citiesApi.getFilterOptions().then(res => res.data);
+    },
     retry: false,
-    initialData: { countries: [], regions: [], currencies: [] },
+ 
   });
 }
 
@@ -62,8 +64,8 @@ export function useUpdateCity() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, ...body }: UpdateCityInput) => {
-      return citiesApi.update(id, body);
+    mutationFn: async ({ ...body }: UpdateCityInput) => {
+      return citiesApi.update(body.id, body);
     },
 
     onSuccess: () => {

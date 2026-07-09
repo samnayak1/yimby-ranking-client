@@ -5,7 +5,7 @@ import { usePoliticianFilterOptions } from '../../hooks/politicians.hook';
 import { useDebounce } from '../../hooks/useDebounce';
 import { FALLBACK_FILTER_OPTIONS, SCORE_RANGES } from '../../types/fallbackFilterOptions';
 import type { PoliticianFilters } from '../../types';
-import { getCountryName } from '../../utils/countries.utils';
+import { countryOptions, getCountryName } from '../../utils/countries.utils';
 
 const { Option } = Select;
 
@@ -26,7 +26,7 @@ export default function PoliticianFiltersComponent({ filters, onFilterChange }: 
     if (debouncedSearch !== (filters.search || '')) {
       onFilterChange({ ...filters, search: debouncedSearch || undefined, page: 1 });
     }
-  }, [debouncedSearch]); 
+  }, [debouncedSearch]);
 
   const handleChange = useCallback(
     (key: keyof PoliticianFilters, value: any) => {
@@ -110,17 +110,13 @@ export default function PoliticianFiltersComponent({ filters, onFilterChange }: 
           <Select
             placeholder="Nationality"
             value={filters.nationalityCode}
-            onChange={v => handleChange('nationalityCode', v)}
-            loading={isLoading && !data}
+            onChange={v => handleChange("nationalityCode", v)}
             allowClear
-            className="w-full"
             showSearch
-            optionFilterProp="children"
-          >
-            {filterOptions.nationalities?.map(n => (
-              <Option key={n} value={n}>{getCountryName(n)}</Option>
-            ))}
-          </Select>
+            className="w-full"
+            optionFilterProp="label"
+            options={countryOptions}
+          />
         </Col>
 
         <Col xs={24} sm={12} md={8} lg={6}>

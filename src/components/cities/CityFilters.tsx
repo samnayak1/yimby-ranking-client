@@ -106,7 +106,7 @@ export default function CityFiltersComponent({ filters, onFilterChange }: Props)
             ))}
           </Select>
         </Col>
-
+{/* 
         <Col xs={24} sm={12} md={8} lg={6}>
           <Select
             placeholder="Region"
@@ -122,7 +122,7 @@ export default function CityFiltersComponent({ filters, onFilterChange }: Props)
               <Option key={r} value={r}>{r}</Option>
             ))}
           </Select>
-        </Col>
+        </Col> */}
 
         <Col xs={24} sm={12} md={8} lg={6}>
           <Select

@@ -8,15 +8,16 @@ import ScoreBadge from '../ScoreBadge';
 import PoliticianFilters from './PoliticianFilters';
 import PoliticianModal from './PoliticiansModal';
 import PoliticianDetails from './PoliticianDetails';
+import { getCountryName } from '../../utils/countries.utils';
 
 const LEANING_COLORS: Record<string, string> = {
-  'Liberal':             'blue',
-  'Conservative':        'orange',
-  'Democratic Socialist':'purple',
-  'Libertarian':         'cyan',
-  'Nationalist':         'red',
-  'Green':               'green',
-  'Independent':         'default',
+  'Liberal': 'blue',
+  'Conservative': 'orange',
+  'Democratic Socialist': 'purple',
+  'Libertarian': 'cyan',
+  'Nationalist': 'red',
+  'Green': 'green',
+  'Independent': 'default',
 };
 
 interface Props {
@@ -24,15 +25,15 @@ interface Props {
 }
 
 export default function PoliticiansTable({ isAdmin }: Props) {
-  const [filters,              setFilters]              = useState<Filters>({ page: 1, limit: 20 });
-  const [modalVisible,         setModalVisible]         = useState(false);
-  const [editingPolitician,    setEditingPolitician]    = useState<Politician | null>(null);
-  const [detailVisible,        setDetailVisible]        = useState(false);
-  const [selectedPolitician,   setSelectedPolitician]   = useState<Politician | null>(null);
+  const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20 });
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingPolitician, setEditingPolitician] = useState<Politician | null>(null);
+  const [detailVisible, setDetailVisible] = useState(false);
+  const [selectedPolitician, setSelectedPolitician] = useState<Politician | null>(null);
 
   const { data, isLoading } = usePoliticians(filters);
-  const deleteMutation      = useDeletePolitician();
-  const politicians         = data?.data ?? [];
+  const deleteMutation = useDeletePolitician();
+  const politicians = data?.data ?? [];
 
   const handleEdit = (p: Politician) => { setEditingPolitician(p); setModalVisible(true); };
 
@@ -51,49 +52,63 @@ export default function PoliticiansTable({ isAdmin }: Props) {
 
   const columns: ColumnsType<Politician> = [
     {
-      title:     'Name',
-      dataIndex: 'name',
-      key:       'name',
-      sorter:    (a, b) => a.name.localeCompare(b.name),
-      render:    name => <span className="font-semibold text-gray-800">{name}</span>,
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      sorter: true,
+      render: name => <span className="font-semibold text-gray-800">{name}</span>,
     },
     {
-      title:     'Designation / Running For',
-      dataIndex: 'designation',
-      key:       'designation',
-      render:    v => v ?? <span className="text-gray-400">—</span>,
+      title: "Designation / Running For",
+      dataIndex: "designation",
+      key: "designation",
+      sorter: true,
+      render: v => v ?? <span className="text-gray-400">—</span>,
     },
     {
-      title:     'Status',
-      dataIndex: 'isInOffice',
-      key:       'isInOffice',
-      render:    v => v
-        ? <Tag color="green"   className="rounded-full">In Office</Tag>
-        : <Tag color="default" className="rounded-full">Former</Tag>,
+      title: "Status",
+      dataIndex: "isInOffice",
+      key: "isInOffice",
+      render: v =>
+        v ? (
+          <Tag color="green" className="rounded-full">
+            In Office
+          </Tag>
+        ) : (
+          <Tag color="default" className="rounded-full">
+            Former
+          </Tag>
+        ),
     },
     {
-      title:     'Nationality',
-      dataIndex: 'nationality',
-      key:       'nationality',
-      render:    v => v ?? <span className="text-gray-400">—</span>,
+      title: "Nationality",
+      dataIndex: "nationalityCode",
+      key: "nationalityCode",
+      sorter: true,
+      render: v => getCountryName(v) ?? <span className="text-gray-400">—</span>,
     },
     {
-      title:     'Political Leaning',
-      dataIndex: 'politicalLeaning',
-      key:       'politicalLeaning',
-      render:    v => v
-        ? <Tag color={LEANING_COLORS[v] ?? 'default'} className="rounded-full">{v}</Tag>
-        : <span className="text-gray-400">—</span>,
+      title: "Political Leaning",
+      dataIndex: "politicalLeaning",
+      key: "politicalLeaning",
+      sorter: true,
+      render: v =>
+        v ? (
+          <Tag color={LEANING_COLORS[v] ?? "default"} className="rounded-full">
+            {v}
+          </Tag>
+        ) : (
+          <span className="text-gray-400">—</span>
+        ),
     },
     {
-      title:  'Rating',
-      key:    'rating',
+      title: "Rating",
+      key: "rating",
       render: (_, r) => <ScoreBadge ratings={r.ratings} />,
-      sorter: (a, b) => (a.ratings[0]?.rating ?? 0) - (b.ratings[0]?.rating ?? 0),
-    },
-    {
-      title:  'Notes',
-      key:    'notes',
+
+    }, {
+      title: 'Notes',
+      key: 'notes',
       render: (_, r) => r.notes
         ? (
           <Tooltip title={r.notes} overlayStyle={{ maxWidth: 400 }} placement="topLeft">
@@ -105,23 +120,23 @@ export default function PoliticiansTable({ isAdmin }: Props) {
         : <span className="text-gray-400">—</span>,
     },
     ...(isAdmin ? [{
-      title:  'Actions',
-      key:    'actions',
-      width:  80,
+      title: 'Actions',
+      key: 'actions',
+      width: 80,
       render: (_: any, record: any) => (
-     
+
         <div onClick={e => e.stopPropagation()}>
           <Dropdown
             menu={{
               items: [
                 {
-                  key:     'edit',
-                  label:   'Edit',
-                  icon:    <EditOutlined />,
+                  key: 'edit',
+                  label: 'Edit',
+                  icon: <EditOutlined />,
                   onClick: () => handleEdit(record),
                 },
                 {
-                  key:   'delete',
+                  key: 'delete',
                   label: (
                     <Popconfirm
                       title="Delete Politician"
@@ -134,7 +149,7 @@ export default function PoliticiansTable({ isAdmin }: Props) {
                       <span>Delete</span>
                     </Popconfirm>
                   ),
-                  icon:   <DeleteOutlined className="text-red-500" />,
+                  icon: <DeleteOutlined className="text-red-500" />,
                   danger: true,
                 },
               ],
@@ -171,20 +186,35 @@ export default function PoliticiansTable({ isAdmin }: Props) {
         dataSource={politicians}
         rowKey="id"
         loading={isLoading}
-     //    scroll={{ y: 600 }}
+        onChange={(pagination, _tableFilters, sorter) => {
+          const s = Array.isArray(sorter) ? sorter[0] : sorter;
+
+          setFilters(prev => ({
+            ...prev,
+            page: pagination.current ?? 1,
+            limit: pagination.pageSize ?? 20,
+            sortBy: (s?.columnKey as string) ?? "name",
+            sortOrder:
+              s?.order === "descend"
+                ? "desc"
+                : s?.order === "ascend"
+                  ? "asc"
+                  : "asc",
+          }));
+        }}
         pagination={{
-          current:  filters.page  || 1,
-          pageSize: filters.limit || 20,
-          total:    data?.pagination?.total ?? 0,
+          current: filters.page,
+          pageSize: filters.limit,
+          total: data?.pagination?.total ?? 0,
           showSizeChanger: true,
           showTotal: total => `${total} politicians`,
-          onChange: (page, limit) => setFilters({ ...filters, page, limit }),
-          onShowSizeChange: (_c, size) => setFilters({ ...filters, page: 1, limit: size }),
         }}
         className="rounded-xl overflow-hidden shadow-sm"
         rowClassName="hover:bg-yimby-50 transition-colors cursor-pointer"
         size="middle"
-        onRow={record => ({ onClick: () => handleRowClick(record) })}
+        onRow={record => ({
+          onClick: () => handleRowClick(record),
+        })}
       />
 
       <PoliticianModal

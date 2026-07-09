@@ -28,10 +28,7 @@ export const FALLBACK_FILTER_OPTIONS = {
       'Centrist', 'Far Left', 'Far Right',
     ],
     nationalities: [
-      'United States', 'Canada', 'United Kingdom', 'Germany', 'France',
-      'Australia', 'Japan', 'India', 'Brazil', 'Mexico', 'Spain', 'Italy',
-      'Netherlands', 'Sweden', 'Norway', 'Denmark', 'Finland', 'New Zealand',
-      'Singapore', 'South Korea',
+      'US','CA','GB','DE','FR','AU','JP','IN','BR','MX','ES','IT','NL','SE','NO','DK','FI','NZ','SG','KR'
     ],
   },
 };

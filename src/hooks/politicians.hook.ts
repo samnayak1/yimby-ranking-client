@@ -18,7 +18,7 @@ export function usePoliticianFilterOptions() {
     queryKey: politicianKeys.filterOptions(),
     queryFn: () => politiciansApi.getFilterOptions().then(res => res.data),
     retry: false,
-    initialData: { designations: [], politicalLeanings: [], nationalities: [] },
+   // initialData: { designations: [], politicalLeanings: [], nationalities: [] },
   });
 }
 

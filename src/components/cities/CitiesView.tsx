@@ -14,6 +14,12 @@ import { getCountryName } from '../../utils/countries.utils';
 interface Props {
   isAdmin: boolean;
 }
+const SORT_MAP: Record<string, string> = {
+  name: "name",
+  geography: "countryCode",
+  price: "medianHousePrice",
+  rating: "rating",
+};
 
 export default function CitiesView({ isAdmin }: Props) {
   const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20 });
@@ -45,7 +51,7 @@ export default function CitiesView({ isAdmin }: Props) {
       title: 'City',
       dataIndex: 'name',
       key: 'name',
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      sorter: true,
       render: name => <span className="font-semibold text-gray-800">{name}</span>,
     },
     {
@@ -61,7 +67,7 @@ export default function CitiesView({ isAdmin }: Props) {
     {
       title: 'Median Price',
       key: 'price',
-      sorter: (a, b) => (a.medianHousePrice ?? 0) - (b.medianHousePrice ?? 0),
+      sorter: true,
       render: (_, r) => r.medianHousePrice != null
         ? new Intl.NumberFormat('en-US', {
           style: 'currency',
@@ -78,8 +84,7 @@ export default function CitiesView({ isAdmin }: Props) {
     {
       title: 'Score',
       key: 'rating',
-      render: (_, r) => <ScoreBadge ratings={r.ratings} />,
-      sorter: (a, b) => (a.ratings[0]?.rating ?? 0) - (b.ratings[0]?.rating ?? 0),
+      render: (_, r) => <ScoreBadge ratings={r.ratings} />
     },
     {
       title: 'Notes',
@@ -170,15 +175,30 @@ export default function CitiesView({ isAdmin }: Props) {
             dataSource={cities}
             rowKey="id"
             loading={isLoading}
-         //   scroll={{ y: 600 }}
+            onChange={(pagination, _tableFilters, sorter) => {
+              const s = Array.isArray(sorter) ? sorter[0] : sorter;
+
+              setFilters({
+                ...filters,
+                page: pagination.current ?? 1,
+                limit: pagination.pageSize ?? 20,
+                sortBy: SORT_MAP[(s?.columnKey as string) ?? "name"] ?? "name",
+                sortOrder:
+                  s?.order === "descend"
+                    ? "desc"
+                    : s?.order === "ascend"
+                      ? "asc"
+                      : "asc",
+              });
+            }}
+
+            //   scroll={{ y: 600 }}
             pagination={{
               current: filters.page || 1,
               pageSize: filters.limit || 20,
               total: data?.pagination?.total ?? 0,
               showSizeChanger: true,
               showTotal: total => `${total} cities`,
-              onChange: (page, limit) => setFilters({ ...filters, page, limit }),
-              onShowSizeChange: (_c, size) => setFilters({ ...filters, page: 1, limit: size }),
             }}
             className="rounded-xl overflow-hidden shadow-sm"
             rowClassName="hover:bg-yimby-50 transition-colors cursor-pointer"
