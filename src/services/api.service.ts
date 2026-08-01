@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getAccessToken } from './auth.service';
-import type { ApiResponse, City, PaginatedResponse, Politician, UpsertCityBody, UpsertCityInput, UpsertCityRatingBody, UpsertPoliticianBody, UpsertPoliticianInput } from '../types';
+import type { ApiResponse, City, CityMapPoint, PaginatedResponse, Politician, UpsertCityBody, UpsertCityInput, UpsertCityRatingBody, UpsertPoliticianBody, UpsertPoliticianInput } from '../types';
 
 const client = axios.create({
     baseURL: '/api',
@@ -66,6 +66,8 @@ id: number, body: any,
 export const citiesApi = {
   getAll: (params?: any) =>
     client.get<PaginatedResponse<City>>('/cities', { params }),
+
+  getMapData: () => client.get<{ data: CityMapPoint[] }>('/cities/map').then(r => r.data),
 
   getById: (id: number) =>
     client

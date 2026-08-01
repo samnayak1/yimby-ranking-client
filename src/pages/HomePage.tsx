@@ -4,6 +4,7 @@ import PoliticiansTable from '../components/politicians/PoliticiansTable';
 import CitiesView from '../components/cities/CitiesView';
 import type { AuthUser } from '../types';
 import Navbar from '../components/NavBar';
+import Footer from '../components/Footer';
 
 
 interface Props {
@@ -25,7 +26,9 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
             Housing Policy Tracker
           </h1>
           <p className="text-sm text-yimby-500 mt-1">
-            Track politicians and cities on zoning reform and housing affordability
+            The United States faces a shortage of roughly 4 million homes, a gap that has built up over more than a decade of underbuilding following the 2008 financial crisis. Zoning restrictions, lengthy permitting processes, and neighborhood opposition have kept supply far below the pace needed to meet growing demand, pushing prices and rents to historic highs across the country.
+            
+            <br></br>Track politicians and cities on zoning reform and housing affordability
           </p>
         </div>
 
@@ -59,6 +62,8 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
           />
         </div>
       </main>
+
+    <footer><Footer/></footer>
     </div>
   );
 }

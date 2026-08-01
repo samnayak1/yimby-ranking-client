@@ -3,7 +3,7 @@ import { Table, Button, Dropdown, Popconfirm, message, Tooltip } from 'antd';
 import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { City, CityFilters as Filters } from '../../types';
-import { useCities, useDeleteCity } from '../../hooks/cities.hook';
+import { useCities, useCityMapData, useDeleteCity } from '../../hooks/cities.hook';
 import ScoreBadge from '../ScoreBadge';
 import CityMap from './CityMap';
 import CityFilters from './CityFilters';
@@ -14,12 +14,12 @@ import { getCountryName } from '../../utils/countries.utils';
 interface Props {
   isAdmin: boolean;
 }
-const SORT_MAP: Record<string, string> = {
+const SORT_MAP = {
   name: "name",
   geography: "countryCode",
   price: "medianHousePrice",
   rating: "rating",
-};
+} as const;
 
 export default function CitiesView({ isAdmin }: Props) {
   const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20 });
@@ -27,7 +27,7 @@ export default function CitiesView({ isAdmin }: Props) {
   const [editingCity, setEditingCity] = useState<City | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
-
+  const { data: mapData }              = useCityMapData(); 
   const { data, isLoading } = useCities(filters);
   const deleteMutation = useDeleteCity();
   const cities = data?.data ?? [];
@@ -84,7 +84,9 @@ export default function CitiesView({ isAdmin }: Props) {
     {
       title: 'Score',
       key: 'rating',
-      render: (_, r) => <ScoreBadge ratings={r.ratings} />
+      dataIndex: 'rating',
+      sorter: true,
+      render: (_, r) => <ScoreBadge rating={r.rating??0} />,
     },
     {
       title: 'Notes',
@@ -151,7 +153,7 @@ export default function CitiesView({ isAdmin }: Props) {
   return (
     <>
       <div className="space-y-6">
-        <CityMap cities={cities} />
+        <CityMap cities={mapData ?? []} />
 
         <div>
           <div className="flex items-center justify-between mb-2">
@@ -177,12 +179,14 @@ export default function CitiesView({ isAdmin }: Props) {
             loading={isLoading}
             onChange={(pagination, _tableFilters, sorter) => {
               const s = Array.isArray(sorter) ? sorter[0] : sorter;
+              const sortBy =
+                SORT_MAP[(s?.columnKey as keyof typeof SORT_MAP) ?? "name"] ?? "name";
 
               setFilters({
                 ...filters,
                 page: pagination.current ?? 1,
                 limit: pagination.pageSize ?? 20,
-                sortBy: SORT_MAP[(s?.columnKey as string) ?? "name"] ?? "name",
+                sortBy,
                 sortOrder:
                   s?.order === "descend"
                     ? "desc"

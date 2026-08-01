@@ -56,6 +56,7 @@ export default function CityModal({
         lng: editingCity.lng,
         medianHousePrice: editingCity.medianHousePrice,
         currency: editingCity.currency,
+          rating: editingCity.rating,
         notes: editingCity.notes,
       });
     } else if (visible) {
@@ -187,7 +188,7 @@ export default function CityModal({
             </Form.Item>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <Form.Item
               name="medianHousePrice"
               label="Median House Price"
@@ -215,6 +216,26 @@ export default function CityModal({
               </Select>
             </Form.Item>
           </div>
+          <Form.Item
+  name="rating"
+  label="Current Rating"
+  rules={[
+    {
+      type: "number",
+      min: 1,
+      max: 10,
+      message: "Rating must be between 1 and 10",
+    },
+  ]}
+>
+  <InputNumber
+    className="w-full"
+    min={1}
+    max={10}
+    step={0.1}
+    precision={1}
+  />
+</Form.Item>
 
           <Form.Item
             name="notes"
@@ -222,6 +243,8 @@ export default function CityModal({
           >
             <Input.TextArea rows={3} />
           </Form.Item>
+
+
 
 
         </Form>

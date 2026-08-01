@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Modal, Form, Input, Select, Switch, message, Tag } from 'antd';
+import { Modal, Form, Input, Select, Switch, message, Tag, InputNumber } from 'antd';
 import { useCreatePolitician, useUpdatePolitician } from '../../hooks/politicians.hook';
 import { countryOptions } from '../../utils/countries.utils';
 import { Divider, Table, Button } from "antd";
@@ -44,6 +44,7 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
         nationalityCode: editingPolitician.nationalityCode,
         // DB stores 0/1 — Switch needs boolean
         isInOffice: editingPolitician.isInOffice === 1,
+        rating:editingPolitician.rating,
         notes: editingPolitician.notes,
       });
     } else if (visible) {
@@ -109,6 +110,26 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
             ))}
           </Select>
         </Form.Item>
+
+        <Form.Item
+  name="rating"
+  label="Current Rating"
+  rules={[
+    {
+      required: true,
+      message: "Please enter a rating",
+    },
+  ]}
+>
+  <InputNumber
+    min={1}
+    max={10}
+    step={0.1}
+    precision={1}
+    className="w-full"
+    placeholder="1.0 - 10.0"
+  />
+</Form.Item>
 
         <Form.Item
           name="nationalityCode"

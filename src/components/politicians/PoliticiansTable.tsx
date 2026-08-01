@@ -24,6 +24,14 @@ interface Props {
   isAdmin: boolean;
 }
 
+const SORT_MAP = {
+  name: "name",
+  designation: "designation",
+  politicalLeaning: "politicalLeaning",
+  nationality: "nationalityCode",
+  rating: "rating",
+} as const;
+
 export default function PoliticiansTable({ isAdmin }: Props) {
   const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20 });
   const [modalVisible, setModalVisible] = useState(false);
@@ -102,11 +110,12 @@ export default function PoliticiansTable({ isAdmin }: Props) {
         ),
     },
     {
-      title: "Rating",
-      key: "rating",
-      render: (_, r) => <ScoreBadge ratings={r.ratings} />,
-
-    }, {
+  title: 'Rating',
+  key: 'rating',
+  dataIndex: 'rating',
+  sorter: true,
+  render: (_, r) => <ScoreBadge rating={r.rating??0} />,
+}, {
       title: 'Notes',
       key: 'notes',
       render: (_, r) => r.notes
@@ -181,41 +190,42 @@ export default function PoliticiansTable({ isAdmin }: Props) {
       {/* Filters are server-side — no onFilter on columns */}
       <PoliticianFilters filters={filters} onFilterChange={setFilters} />
 
-      <Table
-        columns={columns}
-        dataSource={politicians}
-        rowKey="id"
-        loading={isLoading}
-        onChange={(pagination, _tableFilters, sorter) => {
-          const s = Array.isArray(sorter) ? sorter[0] : sorter;
+     <Table
+  columns={columns}
+  dataSource={politicians}
+  rowKey="id"
+  loading={isLoading}
+  onChange={(pagination, _tableFilters, sorter) => {
+    const s = Array.isArray(sorter) ? sorter[0] : sorter;
 
-          setFilters(prev => ({
-            ...prev,
-            page: pagination.current ?? 1,
-            limit: pagination.pageSize ?? 20,
-            sortBy: (s?.columnKey as string) ?? "name",
-            sortOrder:
-              s?.order === "descend"
-                ? "desc"
-                : s?.order === "ascend"
-                  ? "asc"
-                  : "asc",
-          }));
-        }}
-        pagination={{
-          current: filters.page,
-          pageSize: filters.limit,
-          total: data?.pagination?.total ?? 0,
-          showSizeChanger: true,
-          showTotal: total => `${total} politicians`,
-        }}
-        className="rounded-xl overflow-hidden shadow-sm"
-        rowClassName="hover:bg-yimby-50 transition-colors cursor-pointer"
-        size="middle"
-        onRow={record => ({
-          onClick: () => handleRowClick(record),
-        })}
-      />
+    setFilters(prev => ({
+      ...prev,
+      page: pagination.current ?? 1,
+      limit: pagination.pageSize ?? 20,
+      sortBy:
+        SORT_MAP[(s?.columnKey as keyof typeof SORT_MAP) ?? "name"] ?? "name",
+      sortOrder:
+        s?.order === "descend"
+          ? "desc"
+          : s?.order === "ascend"
+          ? "asc"
+          : "asc",
+    }));
+  }}
+  pagination={{
+    current: filters.page,
+    pageSize: filters.limit,
+    total: data?.pagination?.total ?? 0,
+    showSizeChanger: true,
+    showTotal: total => `${total} politicians`,
+  }}
+  className="rounded-xl overflow-hidden shadow-sm"
+  rowClassName="hover:bg-yimby-50 transition-colors cursor-pointer"
+  size="middle"
+  onRow={record => ({
+    onClick: () => handleRowClick(record),
+  })}
+/>
 
       <PoliticianModal
         visible={modalVisible}

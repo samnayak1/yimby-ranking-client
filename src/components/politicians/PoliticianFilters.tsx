@@ -5,7 +5,7 @@ import { usePoliticianFilterOptions } from '../../hooks/politicians.hook';
 import { useDebounce } from '../../hooks/useDebounce';
 import { FALLBACK_FILTER_OPTIONS, SCORE_RANGES } from '../../types/fallbackFilterOptions';
 import type { PoliticianFilters } from '../../types';
-import { countryOptions, getCountryName } from '../../utils/countries.utils';
+import { countryOptions } from '../../utils/countries.utils';
 
 const { Option } = Select;
 

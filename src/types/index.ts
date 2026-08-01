@@ -69,6 +69,7 @@ export interface Politician {
   isInOffice:      number;
   nationalityCode:     string | null;
   politicalLeaning: string | null;
+   rating:             number|null;
   notes:           string | null;
   ratings:        Rating[];
 }
@@ -80,6 +81,7 @@ export interface City {
   region:           string | null;
   medianHousePrice: number | null;
   currency:         string | null;
+  rating:             number|null;
   notes:            string | null;
   lat:              number | null;
   lng:              number | null;
@@ -106,8 +108,7 @@ export interface PaginatedResponse<T> {
 export interface PaginationParams {
   page?: number;
   limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+ 
 }
 
 export interface CityFilters extends PaginationParams {
@@ -118,6 +119,13 @@ export interface CityFilters extends PaginationParams {
   maxPrice?: number;
   minScore?: number;
   maxScore?: number;
+  sortBy?:
+    | "name"
+    | "countryCode"
+    | "region"
+    | "medianHousePrice"
+    | "rating";
+  sortOrder?: 'asc' | 'desc';
 }
 
 
@@ -130,6 +138,15 @@ export interface PoliticianFilters extends PaginationParams {
   minScore?: number;
   maxScore?: number;
   cityId?: number;
+
+  sortBy?:
+    | "name"
+    | "designation"
+    | "politicalLeaning"
+    | "nationalityCode"
+    | "rating";
+
+  sortOrder?: "asc" | "desc";
 }
 
 export type CityFilterOptions = {
@@ -149,3 +166,16 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+
+export type CityMapPoint = {
+  id:               number;
+  name:             string;
+  country:          string;
+  region:           string | null;
+  lat:              number;
+  lng:              number;
+  rating:           number | null;
+  medianHousePrice: number | null;
+  currency:         string | null;
+  notes:            string | null;
+};

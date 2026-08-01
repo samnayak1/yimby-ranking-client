@@ -1,11 +1,10 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import type { City } from '../../types';
+import type { CityMapPoint } from '../../types';
 import { getCountryName } from '../../utils/countries.utils';
 
-
 interface Props {
-  cities: City[];
+  cities: CityMapPoint[];
 }
 
 function scoreColor(score?: number): string {
@@ -41,55 +40,78 @@ function makeIcon(score?: number) {
 export default function CityMap({ cities }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef       = useRef<L.Map | null>(null);
+  const markersRef   = useRef<L.Marker[]>([]);
 
+  // Initialize map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    mapRef.current = L.map(containerRef.current).setView([20, 0], 2);
+
+    mapRef.current = L.map(containerRef.current, { preferCanvas: true })
+      .setView([20, 0], 2);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
     }).addTo(mapRef.current);
+
+    setTimeout(() => mapRef.current?.invalidateSize(), 100);
+
+    return () => {
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
   }, []);
 
+  // Update markers when cities change
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    // Clear existing markers
-    map.eachLayer(layer => {
-      if (layer instanceof L.Marker) map.removeLayer(layer);
-    });
+    // Clear old markers via ref (safer than eachLayer)
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
 
     cities
       .filter(c => c.lat != null && c.lng != null)
       .forEach(c => {
-        const latest = c.ratings[0];
-        const price  = c.medianHousePrice != null
+        const rating = c.rating != null ? Number(c.rating) : undefined;
+
+        const price = c.medianHousePrice != null
           ? new Intl.NumberFormat('en-US', {
-              style:    'currency',
-              currency: c.currency ?? 'USD',
+              style:               'currency',
+              currency:            c.currency ?? 'USD',
               maximumFractionDigits: 0,
             }).format(c.medianHousePrice)
           : '—';
 
-        L.marker([c.lat!, c.lng!], { icon: makeIcon(latest?.rating) })
+        const marker = L.marker([c.lat!, c.lng!], { icon: makeIcon(rating) })
           .addTo(map)
           .bindPopup(`
             <div style="font-family:Inter,sans-serif;min-width:160px">
               <div style="font-weight:700;color:#1a6641;margin-bottom:4px">${c.name}</div>
-              <div style="color:#6b7280;font-size:12px">${getCountryName(c.countryCode)}${c.region ? `, ${c.region}` : ''}</div>
+              <div style="color:#6b7280;font-size:12px">
+                ${getCountryName(c.country ?? '')}${c.region ? `, ${c.region}` : ''}
+              </div>
               <div style="margin-top:8px;font-size:12px">
                 <span style="color:#9ca3af">Median price:</span> ${price}
               </div>
               <div style="font-size:12px">
                 <span style="color:#9ca3af">YIMBY score:</span>
-                <span style="color:${scoreColor(latest?.rating)};font-weight:700">
-                  ${latest?.rating ?? '—'}/10
+                <span style="color:${scoreColor(rating)};font-weight:700">
+                  ${rating ?? '—'}/10
                 </span>
               </div>
-              ${c.notes ? `<div style="margin-top:6px;font-size:11px;color:#9ca3af;font-style:italic">${c.notes.slice(0, 80)}${c.notes.length > 80 ? '…' : ''}</div>` : ''}
+              ${c.notes
+                ? `<div style="margin-top:6px;font-size:11px;color:#9ca3af;font-style:italic">
+                     ${c.notes.slice(0, 80)}${c.notes.length > 80 ? '…' : ''}
+                   </div>`
+                : ''}
             </div>
           `);
+
+        markersRef.current.push(marker);
       });
+
+    setTimeout(() => map.invalidateSize(), 50);
   }, [cities]);
 
   return (

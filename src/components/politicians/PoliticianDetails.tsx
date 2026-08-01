@@ -60,7 +60,7 @@ export default function PoliticianDetails({ visible, onClose, politician }: Prop
           </Descriptions.Item>
 
           <Descriptions.Item label="YIMBY Score" span={2}>
-            <ScoreBadge ratings={politician.ratings} />
+            <ScoreBadge rating={politician.rating??0} />
           </Descriptions.Item>
 
           {politician.notes && (

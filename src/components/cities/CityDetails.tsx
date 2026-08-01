@@ -73,7 +73,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
           </Descriptions.Item>
 
           <Descriptions.Item label="YIMBY Score" span={2}>
-            <ScoreBadge ratings={city.ratings} />
+            <ScoreBadge rating={city.rating??0} />
           </Descriptions.Item>
 
           {city.notes && (

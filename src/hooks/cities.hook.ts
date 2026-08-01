@@ -19,6 +19,7 @@ interface UpdateCityInput {
   medianHousePrice?: number;
   currency?: string;
   notes?: string;
+  rating?: number;
   lat?: number;
   lng?: number;
 }
@@ -28,6 +29,14 @@ export function useCities(filters: CityFilters = {}) {
   return useQuery({
     queryKey: cityKeys.list(filters),
     queryFn: () => citiesApi.getAll(filters).then(res => res.data)
+  });
+}
+
+export function useCityMapData() {
+  return useQuery({
+    queryKey: ['cities', 'map'],
+    queryFn:  () => citiesApi.getMapData().then(r => r.data),
+    staleTime: 1000 * 60 * 10,  // map data changes rarely, cache 10 mins
   });
 }
 
