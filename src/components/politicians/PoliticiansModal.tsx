@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import { Modal, Form, Input, Select, Switch, message, Tag, InputNumber } from 'antd';
+import { Modal, Form, Input, Select, message, Tag, InputNumber } from 'antd';
 import { useCreatePolitician, useUpdatePolitician } from '../../hooks/politicians.hook';
 import { countryOptions } from '../../utils/countries.utils';
 import { Divider, Table, Button } from "antd";
 import { useState } from "react";
-import type { Politician, Rating } from "../../types";
+import { PoliticianStatus, type Politician, type Rating } from "../../types";
 import PoliticianMetricsModal from './PoliticiantMetricsModal';
 
 
@@ -42,9 +42,9 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
         designation: editingPolitician.designation,
         politicalLeaning: editingPolitician.politicalLeaning,
         nationalityCode: editingPolitician.nationalityCode,
-        // DB stores 0/1 — Switch needs boolean
-        isInOffice: editingPolitician.isInOffice === 1,
-        rating:editingPolitician.rating,
+
+        status: editingPolitician.status,
+        rating: editingPolitician.rating,
         notes: editingPolitician.notes,
       });
     } else if (visible) {
@@ -57,8 +57,7 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
       const values = await form.validateFields();
 
       const payload = {
-        ...values,
-        isInOffice: values.isInOffice ? 1 : 0,
+        ...values
       };
 
       if (isEditing) {
@@ -90,7 +89,11 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
       width={600}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" initialValues={{ isInOffice: true }}>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ status: PoliticianStatus.INOFFICE }}
+      >
         <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Name is required' }]}>
           <Input placeholder="Enter politician name" />
         </Form.Item>
@@ -112,24 +115,24 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
         </Form.Item>
 
         <Form.Item
-  name="rating"
-  label="Current Rating"
-  rules={[
-    {
-      required: true,
-      message: "Please enter a rating",
-    },
-  ]}
->
-  <InputNumber
-    min={1}
-    max={10}
-    step={0.1}
-    precision={1}
-    className="w-full"
-    placeholder="1.0 - 10.0"
-  />
-</Form.Item>
+          name="rating"
+          label="Current Rating"
+          rules={[
+            {
+              required: true,
+              message: "Please enter a rating",
+            },
+          ]}
+        >
+          <InputNumber
+            min={1}
+            max={10}
+            step={0.1}
+            precision={1}
+            className="w-full"
+            placeholder="1.0 - 10.0"
+          />
+        </Form.Item>
 
         <Form.Item
           name="nationalityCode"
@@ -149,8 +152,17 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
           />
         </Form.Item>
 
-        <Form.Item name="isInOffice" label="Currently In Office" valuePropName="checked">
-          <Switch />
+        <Form.Item
+          name="status"
+          label="Status"
+          rules={[{ required: true, message: "Please select a status" }]}
+        >
+          <Select placeholder="Select status">
+            <Select.Option value="RUNNING">Running</Select.Option>
+            <Select.Option value="INOFFICE">In Office</Select.Option>
+            <Select.Option value="RETIRED">Retired</Select.Option>
+            <Select.Option value="OUT">Out of Office</Select.Option>
+          </Select>
         </Form.Item>
 
         <Form.Item name="notes" label="Notes">

@@ -2,24 +2,24 @@ import { Modal, Descriptions, Tag, Space, Typography, Divider } from 'antd';
 import { CalendarOutlined } from '@ant-design/icons';
 import ScoreBadge from '../ScoreBadge';
 import Paragraph from 'antd/es/typography/Paragraph';
-import type { Politician } from '../../types';
+import { statusColors, statusLabels, type Politician } from '../../types';
 import { getCountryName } from '../../utils/countries.utils';
 
 const { Text } = Typography;
 
 const LEANING_COLORS: Record<string, string> = {
-  'Liberal':             'blue',
-  'Conservative':        'orange',
-  'Democratic Socialist':'purple',
-  'Libertarian':         'cyan',
-  'Nationalist':         'red',
-  'Green':               'green',
-  'Independent':         'default',
+  'Liberal': 'blue',
+  'Conservative': 'orange',
+  'Democratic Socialist': 'purple',
+  'Libertarian': 'cyan',
+  'Nationalist': 'red',
+  'Green': 'green',
+  'Independent': 'default',
 };
 
 interface Props {
-  visible:    boolean;
-  onClose:    () => void;
+  visible: boolean;
+  onClose: () => void;
   politician: Politician | null;
 }
 
@@ -31,8 +31,11 @@ export default function PoliticianDetails({ visible, onClose, politician }: Prop
       title={
         <Space>
           <span className="text-xl font-semibold">{politician.name}</span>
-          <Tag color={politician.isInOffice ? 'green' : 'default'} className="rounded-full">
-            {politician.isInOffice ? 'In Office' : 'Former'}
+          <Tag
+            color={statusColors[politician.status]}
+            className="rounded-full"
+          >
+            {statusLabels[politician.status]}
           </Tag>
         </Space>
       }
@@ -56,11 +59,11 @@ export default function PoliticianDetails({ visible, onClose, politician }: Prop
           </Descriptions.Item>
 
           <Descriptions.Item label="Nationality">
-            {politician.nationalityCode?getCountryName(politician.nationalityCode) : '—'}
+            {politician.nationalityCode ? getCountryName(politician.nationalityCode) : '—'}
           </Descriptions.Item>
 
           <Descriptions.Item label="YIMBY Score" span={2}>
-            <ScoreBadge rating={politician.rating??0} />
+            <ScoreBadge rating={politician.rating ?? 0} />
           </Descriptions.Item>
 
           {politician.notes && (
@@ -89,8 +92,8 @@ export default function PoliticianDetails({ visible, onClose, politician }: Prop
                         className="w-3 h-3 rounded-full"
                         style={{
                           backgroundColor: r.rating >= 8 ? '#22c55e'
-                                         : r.rating >= 5 ? '#eab308'
-                                         : '#ef4444',
+                            : r.rating >= 5 ? '#eab308'
+                              : '#ef4444',
                         }}
                       />
                       <Text className="font-semibold">{r.rating}/10</Text>

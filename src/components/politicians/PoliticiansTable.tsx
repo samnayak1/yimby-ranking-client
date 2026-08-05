@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Table, Button, Dropdown, Popconfirm, message, Tag, Tooltip } from 'antd';
 import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import type { PoliticianFilters as Filters, Politician } from '../../types';
+import { PoliticianStatus, statusColors, statusLabels, type PoliticianFilters as Filters, type Politician } from '../../types';
 import { useDeletePolitician, usePoliticians } from '../../hooks/politicians.hook';
 import ScoreBadge from '../ScoreBadge';
 import PoliticianFilters from './PoliticianFilters';
@@ -73,21 +73,29 @@ export default function PoliticiansTable({ isAdmin }: Props) {
       sorter: true,
       render: v => v ?? <span className="text-gray-400">—</span>,
     },
-    {
-      title: "Status",
-      dataIndex: "isInOffice",
-      key: "isInOffice",
-      render: v =>
-        v ? (
-          <Tag color="green" className="rounded-full">
-            In Office
-          </Tag>
-        ) : (
-          <Tag color="default" className="rounded-full">
-            Former
-          </Tag>
-        ),
-    },
+   {
+  title: "Status",
+  dataIndex: "status",
+  key: "status",
+  render: (status: PoliticianStatus) => {
+    switch (status) {
+      case PoliticianStatus.INOFFICE:
+        return <Tag color={statusColors.INOFFICE}>{statusLabels.INOFFICE}</Tag>;
+
+      case PoliticianStatus.RUNNING:
+        return <Tag color={statusColors.RUNNING}>{statusLabels.RUNNING}</Tag>;
+
+      case PoliticianStatus.RETIRED:
+        return <Tag color={statusColors.RETIRED}>{statusLabels.RETIRED}</Tag>;
+
+      case PoliticianStatus.OUT:
+        return <Tag color={statusColors.OUT}>{statusLabels.OUT}</Tag>;
+
+      default:
+        return <Tag>{status}</Tag>;
+    }
+  },
+},
     {
       title: "Nationality",
       dataIndex: "nationalityCode",
@@ -110,12 +118,12 @@ export default function PoliticiansTable({ isAdmin }: Props) {
         ),
     },
     {
-  title: 'Rating',
-  key: 'rating',
-  dataIndex: 'rating',
-  sorter: true,
-  render: (_, r) => <ScoreBadge rating={r.rating??0} />,
-}, {
+      title: 'Rating',
+      key: 'rating',
+      dataIndex: 'rating',
+      sorter: true,
+      render: (_, r) => <ScoreBadge rating={r.rating ?? 0} />,
+    }, {
       title: 'Notes',
       key: 'notes',
       render: (_, r) => r.notes
@@ -190,42 +198,42 @@ export default function PoliticiansTable({ isAdmin }: Props) {
       {/* Filters are server-side — no onFilter on columns */}
       <PoliticianFilters filters={filters} onFilterChange={setFilters} />
 
-     <Table
-  columns={columns}
-  dataSource={politicians}
-  rowKey="id"
-  loading={isLoading}
-  onChange={(pagination, _tableFilters, sorter) => {
-    const s = Array.isArray(sorter) ? sorter[0] : sorter;
+      <Table
+        columns={columns}
+        dataSource={politicians}
+        rowKey="id"
+        loading={isLoading}
+        onChange={(pagination, _tableFilters, sorter) => {
+          const s = Array.isArray(sorter) ? sorter[0] : sorter;
 
-    setFilters(prev => ({
-      ...prev,
-      page: pagination.current ?? 1,
-      limit: pagination.pageSize ?? 20,
-      sortBy:
-        SORT_MAP[(s?.columnKey as keyof typeof SORT_MAP) ?? "name"] ?? "name",
-      sortOrder:
-        s?.order === "descend"
-          ? "desc"
-          : s?.order === "ascend"
-          ? "asc"
-          : "asc",
-    }));
-  }}
-  pagination={{
-    current: filters.page,
-    pageSize: filters.limit,
-    total: data?.pagination?.total ?? 0,
-    showSizeChanger: true,
-    showTotal: total => `${total} politicians`,
-  }}
-  className="rounded-xl overflow-hidden shadow-sm"
-  rowClassName="hover:bg-yimby-50 transition-colors cursor-pointer"
-  size="middle"
-  onRow={record => ({
-    onClick: () => handleRowClick(record),
-  })}
-/>
+          setFilters(prev => ({
+            ...prev,
+            page: pagination.current ?? 1,
+            limit: pagination.pageSize ?? 20,
+            sortBy:
+              SORT_MAP[(s?.columnKey as keyof typeof SORT_MAP) ?? "name"] ?? "name",
+            sortOrder:
+              s?.order === "descend"
+                ? "desc"
+                : s?.order === "ascend"
+                  ? "asc"
+                  : "asc",
+          }));
+        }}
+        pagination={{
+          current: filters.page,
+          pageSize: filters.limit,
+          total: data?.pagination?.total ?? 0,
+          showSizeChanger: true,
+          showTotal: total => `${total} politicians`,
+        }}
+        className="rounded-xl overflow-hidden shadow-sm"
+        rowClassName="hover:bg-yimby-50 transition-colors cursor-pointer"
+        size="middle"
+        onRow={record => ({
+          onClick: () => handleRowClick(record),
+        })}
+      />
 
       <PoliticianModal
         visible={modalVisible}

@@ -33,7 +33,7 @@ export interface UpsertCityRatingInput extends UpsertCityRatingBody {
 export interface UpsertPoliticianBody {
   name: string;
   designation?: string | null;
-  isInOffice: number;
+  status: PoliticianStatus;
   nationalityCode: string;
   politicalLeaning?: string | null;
   notes?: string | null;
@@ -66,7 +66,7 @@ export interface Politician {
   id:              number;
   name:            string;
   designation:     string | null;
-  isInOffice:      number;
+  status:      PoliticianStatus;
   nationalityCode:     string | null;
   politicalLeaning: string | null;
    rating:             number|null;
@@ -134,7 +134,7 @@ export interface PoliticianFilters extends PaginationParams {
   designation?: string;
   politicalLeaning?: string;
   nationalityCode?: string;
-  isInOffice?: boolean;
+  status?: PoliticianStatus;
   minScore?: number;
   maxScore?: number;
   cityId?: number;
@@ -178,4 +178,28 @@ export type CityMapPoint = {
   medianHousePrice: number | null;
   currency:         string | null;
   notes:            string | null;
+};
+
+export const PoliticianStatus = {
+  RUNNING: "RUNNING",
+  INOFFICE: "INOFFICE",
+  RETIRED: "RETIRED",
+  OUT: "OUT",
+} as const;
+
+export type PoliticianStatus =
+  (typeof PoliticianStatus)[keyof typeof PoliticianStatus];
+
+export const statusColors: Record<PoliticianStatus, string> = {
+  RUNNING: "blue",
+  INOFFICE: "green",
+  RETIRED: "gold",
+  OUT: "default",
+};
+
+export const statusLabels: Record<PoliticianStatus, string> = {
+  RUNNING: "Running",
+  INOFFICE: "In Office",
+  RETIRED: "Retired",
+  OUT: "Out of Office",
 };

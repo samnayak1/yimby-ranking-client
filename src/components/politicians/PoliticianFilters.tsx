@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Input, Select, Button, Row, Col, Switch, Space } from 'antd';
+import { Input, Select, Button, Row, Col } from 'antd';
 import { SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import { usePoliticianFilterOptions } from '../../hooks/politicians.hook';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -134,13 +134,18 @@ export default function PoliticianFiltersComponent({ filters, onFilterChange }: 
         </Col>
 
         <Col xs={24} sm={12} md={8} lg={6}>
-          <Space>
-            <span className="text-sm text-gray-600">In Office:</span>
-            <Switch
-              checked={!!filters.isInOffice}
-              onChange={checked => handleChange('isInOffice', checked ? 1 : undefined)}
-            />
-          </Space>
+          <Select
+            placeholder="Status"
+            value={filters.status}
+            onChange={value => handleChange("status", value)}
+            allowClear
+            className="w-full"
+          >
+            <Select.Option value="RUNNING">Running</Select.Option>
+            <Select.Option value="INOFFICE">In Office</Select.Option>
+            <Select.Option value="RETIRED">Retired</Select.Option>
+            <Select.Option value="OUT">Out of Office</Select.Option>
+          </Select>
         </Col>
 
         <Col xs={24} sm={12} md={8} lg={6}>
