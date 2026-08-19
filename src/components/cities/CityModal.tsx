@@ -16,6 +16,8 @@ import { useCreateCity, useUpdateCity } from '../../hooks/cities.hook';
 import LocationPickerModal from './LocationPickerModal';
 import type { City, CityRating } from '../../types';
 import CityMetricsModal from './CityMetricsModal';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { responsiveModalProps } from '../../utils/responsive.utils';
 
 interface CityModalProps {
   visible: boolean;
@@ -32,6 +34,7 @@ export default function CityModal({
   onClose,
   editingCity,
 }: CityModalProps) {
+  const isMobile = useIsMobile();
   const [form] = Form.useForm();
 
   const createMutation = useCreateCity();
@@ -101,7 +104,7 @@ export default function CityModal({
         confirmLoading={
           createMutation.isPending || updateMutation.isPending
         }
-        width={650}
+        {...responsiveModalProps(isMobile, 650)}
       >
         <Form
           form={form}
@@ -148,13 +151,14 @@ export default function CityModal({
           <div className="flex justify-end mb-4">
             <Button
               type="default"
+              className="w-full sm:w-auto"
               onClick={() => setLocationPickerOpen(true)}
             >
               📍 Pick on Map
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
             <Form.Item
               name="lat"
               label="Latitude"
@@ -188,7 +192,7 @@ export default function CityModal({
             </Form.Item>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4">
             <Form.Item
               name="medianHousePrice"
               label="Median House Price"
@@ -339,6 +343,7 @@ export default function CityModal({
             <div className="flex justify-end mt-4">
               <Button
                 type="primary"
+                className="w-full sm:w-auto"
                 onClick={() => {
                   setEditingMetrics(undefined);
                   setMetricsModalOpen(true);

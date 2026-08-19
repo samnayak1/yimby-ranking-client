@@ -4,6 +4,8 @@ import ScoreBadge from '../ScoreBadge';
 import Paragraph from 'antd/es/typography/Paragraph';
 import type { City } from '../../types';
 import { getCountryName } from '../../utils/countries.utils';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { responsiveModalProps } from '../../utils/responsive.utils';
 
 const { Text } = Typography;
 
@@ -14,6 +16,8 @@ interface CityDetailModalProps {
 }
 
 export default function CityDetailModal({ visible, onClose, city }: CityDetailModalProps) {
+  const isMobile = useIsMobile();
+
   if (!city) return null;
 
   const formatPrice = (price: number, currency: string) => {
@@ -28,8 +32,8 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
   return (
     <Modal
       title={
-        <Space>
-          <span className="text-xl font-semibold">{city.name}</span>
+        <Space wrap size={[8, 4]} className="pr-6">
+          <span className="text-base sm:text-xl font-semibold">{city.name}</span>
           <Tag color="blue" className="rounded-full">
             <GlobalOutlined className="mr-1" />
             {getCountryName(city.countryCode)}
@@ -39,10 +43,14 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
       open={visible}
       onCancel={onClose}
       footer={null}
-      width={700}
+      {...responsiveModalProps(isMobile, 700)}
     >
       <div className="py-2">
-        <Descriptions column={2} bordered size="middle">
+        <Descriptions
+          column={{ xs: 1, sm: 2 }}
+          bordered
+          size={isMobile ? 'small' : 'middle'}
+        >
           <Descriptions.Item label="Country" span={2}>
             <Text strong>{getCountryName(city.countryCode)}</Text>
           </Descriptions.Item>
@@ -61,7 +69,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
           </Descriptions.Item>
 
           <Descriptions.Item label="Median House Price" span={2}>
-            <Space>
+            <Space wrap size={[8, 4]}>
               <DollarOutlined className="text-green-600" />
               <Text strong className="text-lg">
                 {city.medianHousePrice && city.currency ? formatPrice(city.medianHousePrice, city.currency) : '—'}
@@ -78,8 +86,8 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
 
           {city.notes && (
             <Descriptions.Item label="Notes" span={2}>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                <Paragraph className="whitespace-pre-wrap text-gray-700 m-0">
+              <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border border-gray-100">
+                <Paragraph className="whitespace-pre-wrap break-words text-gray-700 m-0">
                   {city.notes}
                 </Paragraph>
               </div>
@@ -95,12 +103,12 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
                 Rating History
               </Space>
             </Divider>
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
               <Space direction="vertical" className="w-full">
                 {city.ratings.map((rating) => (
                   <div
                     key={rating.year}
-                    className="rounded-lg border border-gray-200 bg-white p-4"
+                    className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <Text strong className="text-base">
@@ -123,7 +131,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
                       <div className="flex justify-between">
                         <Text type="secondary">Permits Issued</Text>
                         <Text>{rating.permitsIssued ?? "—"}</Text>

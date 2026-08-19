@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Modal, Input, List, Button, Space } from 'antd';
 import L from 'leaflet';
 import { getCountryName } from '../../utils/countries.utils';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { responsiveModalProps } from '../../utils/responsive.utils';
 interface SelectedLocation {
     lat: number;
     lng: number;
@@ -31,6 +33,7 @@ export default function LocationPickerModal({
     onCancel,
     onSelect,
 }: Props) {
+    const isMobile = useIsMobile();
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
     const markerRef = useRef<L.Marker | null>(null);
@@ -160,15 +163,17 @@ export default function LocationPickerModal({
         <Modal
             open={open}
             title="Pick Location"
-            width={900}
+            {...responsiveModalProps(isMobile, 900)}
             onCancel={onCancel}
             footer={[
-                <Button key="cancel" onClick={onCancel}>
+                <Button key="cancel" onClick={onCancel} block={isMobile}>
                     Cancel
                 </Button>,
                 <Button
                     key="select"
                     type="primary"
+                    block={isMobile}
+                    className={isMobile ? 'ml-0 mt-2' : undefined}
                     disabled={!selected}
                     onClick={() => {
                         if (!selected) return;
@@ -196,11 +201,11 @@ export default function LocationPickerModal({
                 <List
                     bordered
                     size="small"
-                    style={{ marginBottom: 12 }}
+                    style={{ marginBottom: 12, maxHeight: 200, overflowY: 'auto' }}
                     dataSource={results}
                     renderItem={(item) => (
                         <List.Item
-                            style={{ cursor: 'pointer' }}
+                            style={{ cursor: 'pointer', fontSize: 14, wordBreak: 'break-word' }}
                             onClick={() => chooseResult(item)}
                         >
                             {item.display_name}
@@ -212,7 +217,7 @@ export default function LocationPickerModal({
             <div
                 ref={mapContainerRef}
                 style={{
-                    height: 500,
+                    height: isMobile ? 320 : 500,
                     width: '100%',
                     borderRadius: 8,
                     overflow: 'hidden',
@@ -220,7 +225,7 @@ export default function LocationPickerModal({
             />
 
             {selected && (
-                <div style={{ marginTop: 12 }}>
+                <div style={{ marginTop: 12, fontSize: 14, wordBreak: 'break-word' }}>
                     <strong>City:</strong> {selected.city || '—'}
                     <br />
 

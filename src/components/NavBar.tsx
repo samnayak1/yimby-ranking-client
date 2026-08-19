@@ -16,14 +16,14 @@ export default function Navbar({ user, onLogout }: Props) {
 
   return (
     <header className="bg-white border-b border-yimby-100 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-2">
 
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-yimby-500 flex items-center justify-center text-white text-sm">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 shrink-0 rounded-lg bg-yimby-500 flex items-center justify-center text-white text-sm">
             🏗
           </div>
-          <div>
-            <span className="font-bold text-yimby-700 text-sm tracking-tight">YIMBY Tracker</span>
+          <div className="min-w-0">
+            <span className="font-bold text-yimby-700 text-sm tracking-tight truncate block">YIMBY Tracker</span>
           </div>
         </div>
 
@@ -52,9 +52,9 @@ export default function Navbar({ user, onLogout }: Props) {
             <Button
               type="text"
               icon={<UserOutlined />}
-              className="flex items-center gap-1.5 text-gray-600 hover:text-yimby-600"
+              className="flex items-center gap-1.5 text-gray-600 hover:text-yimby-600 shrink-0 max-w-[55vw]"
             >
-              <span className="text-sm hidden sm:inline">{user.email}</span>
+              <span className="text-sm hidden sm:inline truncate">{user.email}</span>
             </Button>
           </Dropdown>
         )}

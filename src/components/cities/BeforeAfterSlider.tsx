@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   ReactCompareSlider,
   ReactCompareSliderImage,
@@ -33,49 +32,43 @@ const PAIRS = [
 ];
 
 export default function BeforeAfterSlider() {
-  const [current, setCurrent] = useState(0);
-  const pair = PAIRS[current];
-
   return (
-    <div className="py-4">
-      <div className="flex flex-wrap gap-2 mb-4">
-        {PAIRS.map((p, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={
-              i === current
-                ? 'px-4 py-1.5 rounded-lg border bg-yimby-100 text-yimby-700 border-yimby-300 text-sm'
-                : 'px-4 py-1.5 rounded-lg border bg-white text-gray-500 border-gray-200 text-sm hover:bg-gray-50'
+    <div className="py-2 sm:py-4 space-y-8 sm:space-y-12">
+      {PAIRS.map((pair) => (
+        <section key={pair.label}>
+          <h3 className="mb-3 text-base sm:text-lg font-semibold text-gray-800">
+            {pair.label}
+          </h3>
+
+          <ReactCompareSlider
+            itemOne={
+              <ReactCompareSliderImage
+                src={pair.before}
+                alt={`${pair.label} before`}
+              />
             }
-          >
-            {p.label}
-          </button>
-        ))}
-      </div>
-
-      <ReactCompareSlider
-        itemOne={
-          <ReactCompareSliderImage
-            src={pair.before}
-            alt={`${pair.label} before`}
+            itemTwo={
+              <ReactCompareSliderImage
+                src={pair.after}
+                alt={`${pair.label} after`}
+              />
+            }
+            style={{
+              borderRadius: 12,
+              border: '0.5px solid #d1fae5',
+              width: '100%',
+              maxHeight: '70vh',
+              touchAction: 'pan-y',
+            }}
           />
-        }
-        itemTwo={
-          <ReactCompareSliderImage
-            src={pair.after}
-            alt={`${pair.label} after`}
-          />
-        }
-        style={{
-          borderRadius: 12,
-          border: '0.5px solid #d1fae5',
-        }}
-      />
 
-      <p className="mt-3 text-center text-xs text-gray-500">
-        <strong>{pair.caption}</strong>
-        <br />
+          <p className="mt-3 text-center text-xs text-gray-500">
+            <strong>{pair.caption}</strong>
+          </p>
+        </section>
+      ))}
+
+      <p className="text-center text-xs text-gray-500">
         Images © Google Maps. Imagery dates vary by location and are shown for
         comparison purposes only.
       </p>

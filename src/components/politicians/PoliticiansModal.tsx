@@ -6,6 +6,8 @@ import { Divider, Table, Button } from "antd";
 import { useState } from "react";
 import { PoliticianStatus, type Politician, type Rating } from "../../types";
 import PoliticianMetricsModal from './PoliticiantMetricsModal';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { responsiveModalProps } from '../../utils/responsive.utils';
 
 
 interface Props {
@@ -25,6 +27,7 @@ const LEANINGS = [
 ];
 
 export default function PoliticianModal({ visible, onClose, editingPolitician }: Props) {
+  const isMobile = useIsMobile();
   const [form] = Form.useForm();
   const createMutation = useCreatePolitician();
   const updateMutation = useUpdatePolitician();
@@ -86,7 +89,7 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
       onCancel={onClose}
       onOk={handleSubmit}
       confirmLoading={createMutation.isPending || updateMutation.isPending}
-      width={600}
+      {...responsiveModalProps(isMobile, 600)}
       destroyOnHidden
     >
       <Form
@@ -180,6 +183,7 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
             size="small"
             rowKey="year"
             pagination={false}
+            scroll={{ x: 'max-content' }}
             dataSource={editingPolitician?.ratings ?? []}
             columns={[
               {
@@ -231,6 +235,7 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
           <div className="flex justify-end mt-4">
             <Button
               type="primary"
+              className="w-full sm:w-auto"
               onClick={() => {
                 setEditingRating(undefined);
                 setRatingsModalOpen(true);

@@ -10,6 +10,8 @@ import CityFilters from './CityFilters';
 import CityModal from './CityModal';
 import CityDetailModal from './CityDetails';
 import { getCountryName } from '../../utils/countries.utils';
+import { useIsMobile, useIsNarrow } from '../../hooks/useIsMobile';
+import { responsivePagination } from '../../utils/responsive.utils';
 
 interface Props {
   isAdmin: boolean;
@@ -22,6 +24,8 @@ const SORT_MAP = {
 } as const;
 
 export default function CitiesView({ isAdmin }: Props) {
+  const isMobile = useIsMobile();
+  const isNarrow = useIsNarrow();
   const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20 });
   const [modalVisible, setModalVisible] = useState(false);
   const [editingCity, setEditingCity] = useState<City | null>(null);
@@ -46,17 +50,47 @@ export default function CitiesView({ isAdmin }: Props) {
   const handleModalClose = () => { setModalVisible(false); setEditingCity(null); };
   const handleRowClick = (record: City) => { setSelectedCity(record); setDetailVisible(true); };
 
+  const formatPrice = (r: City) =>
+    r.medianHousePrice != null
+      ? new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: r.currency ?? 'USD',
+        maximumFractionDigits: 0,
+      }).format(r.medianHousePrice)
+      : null;
+
   const columns: ColumnsType<City> = [
+    // Below `sm` the table can't fit six columns without pushing the score
+    // off-screen, so identity + geography + price collapse into one cell.
+    {
+      title: 'City',
+      key: 'summary',
+      responsive: ['xs'],
+      render: (_, r) => (
+        <div className="flex flex-col gap-0.5 whitespace-normal">
+          <span className="font-semibold text-gray-800">{r.name}</span>
+          <span className="text-xs text-gray-500">
+            {getCountryName(r.countryCode)}
+            {r.region && ` / ${r.region}`}
+          </span>
+          <span className="text-xs text-gray-600">
+            {formatPrice(r) ?? '—'}
+          </span>
+        </div>
+      ),
+    },
     {
       title: 'City',
       dataIndex: 'name',
       key: 'name',
       sorter: true,
+      responsive: ['sm'],
       render: name => <span className="font-semibold text-gray-800">{name}</span>,
     },
     {
       title: 'Country / Region',
       key: 'geography',
+      responsive: ['sm'],
       render: (_, r) => (
         <span className="text-gray-600">
           {getCountryName(r.countryCode)}
@@ -68,17 +102,13 @@ export default function CitiesView({ isAdmin }: Props) {
       title: 'Median Price',
       key: 'price',
       sorter: true,
-      render: (_, r) => r.medianHousePrice != null
-        ? new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: r.currency ?? 'USD',
-          maximumFractionDigits: 0,
-        }).format(r.medianHousePrice)
-        : <span className="text-gray-400">—</span>,
+      responsive: ['sm'],
+      render: (_, r) => formatPrice(r) ?? <span className="text-gray-400">—</span>,
     },
     {
       title: 'Currency',
       key: 'currency',
+      responsive: ['lg'],
       render: (_, r) => r.currency ?? <span className="text-gray-400">—</span>,
     },
     {
@@ -92,6 +122,7 @@ export default function CitiesView({ isAdmin }: Props) {
       title: 'Notes',
       key: 'notes',
       width: 320,
+      responsive: ['lg'],
       render: (_, r) =>
         r.notes ? (
           <Tooltip
@@ -99,7 +130,7 @@ export default function CitiesView({ isAdmin }: Props) {
             overlayStyle={{ maxWidth: 500 }}
             placement="topLeft"
           >
-            <div className="text-gray-500 text-sm cursor-help line-clamp-2 max-w-md">
+            <div className="text-gray-500 text-sm cursor-help line-clamp-2 max-w-md whitespace-normal">
               {r.notes}
             </div>
           </Tooltip>
@@ -156,12 +187,13 @@ export default function CitiesView({ isAdmin }: Props) {
         <CityMap cities={mapData ?? []} />
 
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
             <h3 className="text-base font-semibold text-gray-700">Cities</h3>
             {isAdmin && (
               <Button
                 type="primary"
                 icon={<PlusOutlined />}
+                className="w-full sm:w-auto"
                 onClick={() => { setEditingCity(null); setModalVisible(true); }}
               >
                 Add City
@@ -196,17 +228,19 @@ export default function CitiesView({ isAdmin }: Props) {
               });
             }}
 
-            //   scroll={{ y: 600 }}
+            // Only below `lg`: at wider sizes the columns fit and `max-content`
+            // would size the table past its container.
+            scroll={isNarrow ? { x: 'max-content' } : undefined}
             pagination={{
               current: filters.page || 1,
               pageSize: filters.limit || 20,
               total: data?.pagination?.total ?? 0,
-              showSizeChanger: true,
-              showTotal: total => `${total} cities`,
+              ...responsivePagination(isMobile),
+              showTotal: isMobile ? undefined : total => `${total} cities`,
             }}
             className="rounded-xl overflow-hidden shadow-sm"
             rowClassName="hover:bg-yimby-50 transition-colors cursor-pointer"
-            size="middle"
+            size={isMobile ? 'small' : 'middle'}
             onRow={record => ({ onClick: () => handleRowClick(record) })}
           />
         </div>

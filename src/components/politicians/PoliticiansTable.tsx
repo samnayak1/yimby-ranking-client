@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { Table, Button, Dropdown, Popconfirm, message, Tag, Tooltip } from 'antd';
 import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { PoliticianStatus, statusColors, statusLabels, type PoliticianFilters as Filters, type Politician } from '../../types';
+import { statusColors, statusLabels, type PoliticianStatus, type PoliticianFilters as Filters, type Politician } from '../../types';
 import { useDeletePolitician, usePoliticians } from '../../hooks/politicians.hook';
 import ScoreBadge from '../ScoreBadge';
 import PoliticianFilters from './PoliticianFilters';
 import PoliticianModal from './PoliticiansModal';
 import PoliticianDetails from './PoliticianDetails';
 import { getCountryName } from '../../utils/countries.utils';
+import { useIsMobile, useIsNarrow } from '../../hooks/useIsMobile';
+import { responsivePagination } from '../../utils/responsive.utils';
 
 const LEANING_COLORS: Record<string, string> = {
   'Liberal': 'blue',
@@ -33,6 +35,8 @@ const SORT_MAP = {
 } as const;
 
 export default function PoliticiansTable({ isAdmin }: Props) {
+  const isMobile = useIsMobile();
+  const isNarrow = useIsNarrow();
   const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20 });
   const [modalVisible, setModalVisible] = useState(false);
   const [editingPolitician, setEditingPolitician] = useState<Politician | null>(null);
@@ -58,12 +62,36 @@ export default function PoliticiansTable({ isAdmin }: Props) {
 
   const handleRowClick = (record: Politician) => { setSelectedPolitician(record); setDetailVisible(true); };
 
+  const statusTag = (status: PoliticianStatus) =>
+    statusLabels[status]
+      ? <Tag color={statusColors[status]}>{statusLabels[status]}</Tag>
+      : <Tag>{status}</Tag>;
+
   const columns: ColumnsType<Politician> = [
+    // Phones can't fit seven columns, and a horizontally-scrolled table hides
+    // the rating. Below `sm` we collapse identity into one stacked cell so
+    // name, role and status stay visible next to the score.
+    {
+      title: "Politician",
+      key: "summary",
+      responsive: ["xs"],
+      render: (_, r) => (
+        <div className="flex flex-col gap-1 whitespace-normal">
+          <span className="font-semibold text-gray-800">{r.name}</span>
+          <span className="text-xs text-gray-500">
+            {r.designation ?? '—'}
+            {r.politicalLeaning && ` · ${r.politicalLeaning}`}
+          </span>
+          <div>{statusTag(r.status)}</div>
+        </div>
+      ),
+    },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
       sorter: true,
+      responsive: ["sm"],
       render: name => <span className="font-semibold text-gray-800">{name}</span>,
     },
     {
@@ -71,36 +99,22 @@ export default function PoliticiansTable({ isAdmin }: Props) {
       dataIndex: "designation",
       key: "designation",
       sorter: true,
+      responsive: ["sm"],
       render: v => v ?? <span className="text-gray-400">—</span>,
     },
-   {
-  title: "Status",
-  dataIndex: "status",
-  key: "status",
-  render: (status: PoliticianStatus) => {
-    switch (status) {
-      case PoliticianStatus.INOFFICE:
-        return <Tag color={statusColors.INOFFICE}>{statusLabels.INOFFICE}</Tag>;
-
-      case PoliticianStatus.RUNNING:
-        return <Tag color={statusColors.RUNNING}>{statusLabels.RUNNING}</Tag>;
-
-      case PoliticianStatus.RETIRED:
-        return <Tag color={statusColors.RETIRED}>{statusLabels.RETIRED}</Tag>;
-
-      case PoliticianStatus.OUT:
-        return <Tag color={statusColors.OUT}>{statusLabels.OUT}</Tag>;
-
-      default:
-        return <Tag>{status}</Tag>;
-    }
-  },
-},
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      responsive: ["sm"],
+      render: (status: PoliticianStatus) => statusTag(status),
+    },
     {
       title: "Nationality",
       dataIndex: "nationalityCode",
       key: "nationalityCode",
       sorter: true,
+      responsive: ["md"],
       render: v => getCountryName(v) ?? <span className="text-gray-400">—</span>,
     },
     {
@@ -108,6 +122,7 @@ export default function PoliticiansTable({ isAdmin }: Props) {
       dataIndex: "politicalLeaning",
       key: "politicalLeaning",
       sorter: true,
+      responsive: ["lg"],
       render: v =>
         v ? (
           <Tag color={LEANING_COLORS[v] ?? "default"} className="rounded-full">
@@ -126,10 +141,11 @@ export default function PoliticiansTable({ isAdmin }: Props) {
     }, {
       title: 'Notes',
       key: 'notes',
+      responsive: ['lg'],
       render: (_, r) => r.notes
         ? (
           <Tooltip title={r.notes} overlayStyle={{ maxWidth: 400 }} placement="topLeft">
-            <div className="text-gray-500 text-sm cursor-help line-clamp-2 max-w-75">
+            <div className="text-gray-500 text-sm cursor-help line-clamp-2 max-w-75 whitespace-normal">
               {r.notes}
             </div>
           </Tooltip>
@@ -182,12 +198,13 @@ export default function PoliticiansTable({ isAdmin }: Props) {
 
   return (
     <>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
         <h3 className="text-base font-semibold text-gray-700">Politicians</h3>
         {isAdmin && (
           <Button
             type="primary"
             icon={<PlusOutlined />}
+            className="w-full sm:w-auto"
             onClick={() => { setEditingPolitician(null); setModalVisible(true); }}
           >
             Add Politician
@@ -220,16 +237,19 @@ export default function PoliticiansTable({ isAdmin }: Props) {
                   : "asc",
           }));
         }}
+        // Only below `lg`: at wider sizes the columns fit and `max-content`
+        // would size the table past its container.
+        scroll={isNarrow ? { x: 'max-content' } : undefined}
         pagination={{
           current: filters.page,
           pageSize: filters.limit,
           total: data?.pagination?.total ?? 0,
-          showSizeChanger: true,
-          showTotal: total => `${total} politicians`,
+          ...responsivePagination(isMobile),
+          showTotal: isMobile ? undefined : total => `${total} politicians`,
         }}
         className="rounded-xl overflow-hidden shadow-sm"
         rowClassName="hover:bg-yimby-50 transition-colors cursor-pointer"
-        size="middle"
+        size={isMobile ? 'small' : 'middle'}
         onRow={record => ({
           onClick: () => handleRowClick(record),
         })}

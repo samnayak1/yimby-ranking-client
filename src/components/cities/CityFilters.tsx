@@ -77,8 +77,8 @@ export default function CityFiltersComponent({ filters, onFilterChange }: Props)
     )?.key;
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg mb-4">
-      <Row gutter={[16, 16]}>
+    <div className="bg-gray-50 p-3 sm:p-4 rounded-lg mb-4">
+      <Row gutter={[12, 12]}>
         <Col xs={24} sm={12} md={8} lg={6}>
           <Input
             prefix={<SearchOutlined className="text-gray-400" />}
@@ -153,7 +153,7 @@ export default function CityFiltersComponent({ filters, onFilterChange }: Props)
         </Col>
 
         <Col xs={24} sm={12} md={8} lg={6}>
-          <Button icon={<ClearOutlined />} onClick={handleClear}>
+          <Button icon={<ClearOutlined />} onClick={handleClear} className="w-full sm:w-auto">
             Clear Filters
           </Button>
         </Col>

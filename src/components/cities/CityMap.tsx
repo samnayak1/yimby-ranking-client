@@ -55,7 +55,16 @@ export default function CityMap({ cities }: Props) {
 
     setTimeout(() => mapRef.current?.invalidateSize(), 100);
 
+    // The container height changes at the sm breakpoint and on rotation —
+    // Leaflet needs to be told, or tiles render into the old box.
+    const onResize = () => mapRef.current?.invalidateSize();
+    window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+
     return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+
       mapRef.current?.remove();
       mapRef.current = null;
     };
@@ -117,7 +126,7 @@ export default function CityMap({ cities }: Props) {
   return (
     <div
       ref={containerRef}
-      className="w-full h-80 rounded-xl border border-yimby-100 shadow-sm overflow-hidden"
+      className="w-full h-64 sm:h-80 rounded-xl border border-yimby-100 shadow-sm overflow-hidden"
     />
   );
 }

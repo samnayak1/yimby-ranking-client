@@ -6,6 +6,7 @@ import BeforeAfterSlider from '../components/cities/BeforeAfterSlider';
 import type { AuthUser } from '../types';
 import Navbar from '../components/NavBar';
 import Footer from '../components/Footer';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface Props {
   user:     AuthUser | null;
@@ -14,14 +15,16 @@ interface Props {
 }
 
 export default function HomePage({ user, isAdmin, onLogout }: Props) {
+  const isMobile = useIsMobile();
+
   return (
     <div className="min-h-screen bg-yimby-50">
       <Navbar user={user} onLogout={onLogout} />
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-yimby-800 tracking-tight">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-xl sm:text-2xl font-bold text-yimby-800 tracking-tight">
             Housing Policy Tracker
           </h1>
           <p className="text-sm text-yimby-500 mt-1">
@@ -36,10 +39,11 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-yimby-100 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-yimby-100 p-3 sm:p-6">
           <Tabs
             defaultActiveKey="media"
-            size="large"
+            size={isMobile ? 'middle' : 'large'}
+            tabBarGutter={isMobile ? 8 : undefined}
             items={[
               {
                 key:   'media',

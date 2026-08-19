@@ -8,6 +8,8 @@ import {
 
 import type { Rating } from "../../types";
 import { useUpsertPoliticianRating } from "../../hooks/politicians.hook";
+import { useIsMobile } from "../../hooks/useIsMobile";
+import { responsiveModalProps } from "../../utils/responsive.utils";
 
 
 interface Props {
@@ -23,6 +25,7 @@ export default function PoliticianMetricsModal({
     rating,
     onClose,
 }: Props) {
+    const isMobile = useIsMobile();
     const [form] = Form.useForm();
 
     const upsertMutation = useUpsertPoliticianRating();
@@ -74,6 +77,7 @@ export default function PoliticianMetricsModal({
             onCancel={onClose}
             onOk={handleSubmit}
             confirmLoading={upsertMutation.isPending}
+            {...responsiveModalProps(isMobile, 520)}
             destroyOnHidden
         >
             <Form form={form} layout="vertical">

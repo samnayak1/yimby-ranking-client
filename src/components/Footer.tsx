@@ -2,8 +2,8 @@
 
 export default function Footer() {
   return (
-    <footer className="mt-16 border-t border-gray-200 bg-white">
-      <div className="mx-auto max-w-7xl px-6 py-8">
+    <footer className="mt-10 sm:mt-16 border-t border-gray-200 bg-white">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <h3 className="text-sm font-semibold text-gray-900">
@@ -18,14 +18,14 @@ export default function Footer() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 shrink-0">
             <a
               href="https://yimbyalliance.org/give/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg bg-yimby-600 px-4 py-2 text-sm font-medium text-white hover:bg-yimby-700"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-yimby-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-yimby-700"
             >
-              
+
               Donate to YIMBY Alliance
             </a>
 
@@ -33,7 +33,7 @@ export default function Footer() {
               href="https://yimbyaction.org/?form=donate"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-lg border border-yimby-600 px-4 py-2 text-sm font-medium text-yimby-700 hover:bg-yimby-50"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-yimby-600 px-4 py-2.5 text-sm font-medium text-yimby-700 hover:bg-yimby-50"
             >
               Donate to YIMBY Action
             </a>

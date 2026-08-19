@@ -10,6 +10,8 @@ import {
 
 import type { CityRating } from '../../types';
 import { useUpsertCityRatings } from '../../hooks/cities.hook';
+import { useIsMobile } from '../../hooks/useIsMobile';
+import { responsiveModalProps } from '../../utils/responsive.utils';
 
 interface Props {
   open: boolean;
@@ -24,6 +26,7 @@ export default function CityMetricsModal({
   rating,
   onClose,
 }: Props) {
+  const isMobile = useIsMobile();
   const [form] = Form.useForm();
 
   const mutation = useUpsertCityRatings();
@@ -64,7 +67,7 @@ export default function CityMetricsModal({
   return (
     <Modal
       open={open}
-      width={700}
+      {...responsiveModalProps(isMobile, 700)}
       title={
         rating
           ? `Edit ${rating.year} Metrics`
@@ -86,7 +89,7 @@ export default function CityMetricsModal({
       ]}
     >
       <Form form={form} layout="vertical">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4">
           <Form.Item
             name="year"
             label="Year"
@@ -127,7 +130,7 @@ export default function CityMetricsModal({
 
         <Divider />
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4">
           <Form.Item
             name="permitsIssued"
             label="Permits Issued"

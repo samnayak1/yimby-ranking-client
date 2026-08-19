@@ -47,11 +47,11 @@ export default function LoginPage({ onSuccess }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-yimby-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-yimby-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
 
         {/* Logo */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-8 sm:mb-10">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-yimby-500 text-white text-2xl mb-4 shadow-md">
             🏗
           </div>
@@ -60,7 +60,7 @@ export default function LoginPage({ onSuccess }: Props) {
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-yimby-100 p-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-yimby-100 p-6 sm:p-8">
 
           {error && (
             <Alert type="error" message={error} className="mb-5" showIcon />
