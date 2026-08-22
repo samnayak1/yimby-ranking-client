@@ -1,0 +1,33 @@
+# SITE_ADDRESS controls TLS:
+#   unset            -> ":80", plain HTTP (fine for an IP-only / pre-domain setup)
+#   yimby.example.com -> automatic HTTPS via Let's Encrypt, HTTP redirects to HTTPS
+{$SITE_ADDRESS::80} {
+	encode gzip
+
+	root * /usr/share/caddy
+
+	request_body {
+		max_size 50MB
+	}
+
+	# Reachable from outside for uptime checks / an ALB.
+	handle /health {
+		reverse_proxy backend:3000
+	}
+
+	handle /api/* {
+		reverse_proxy backend:3000
+	}
+
+	# Hashed build assets — safe to cache forever.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	header /index.html Cache-Control "no-cache"
+
+	# React SPA: serve index.html for any client-side route.
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+}

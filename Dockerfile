@@ -19,10 +19,12 @@ ENV NODE_OPTIONS=--max-old-space-size=512
 RUN npm run build
 
 
-FROM nginx:alpine
+FROM caddy:2-alpine
 
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/caddy
+COPY Caddyfile /etc/caddy/Caddyfile
 
-EXPOSE 80
+# 443 for automatic HTTPS once SITE_ADDRESS is a real domain.
+EXPOSE 80 443
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
