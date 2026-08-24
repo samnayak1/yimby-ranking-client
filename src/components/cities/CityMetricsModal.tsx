@@ -191,6 +191,17 @@ export default function CityMetricsModal({
               min={0}
             />
           </Form.Item>
+
+          <Form.Item
+            name="medianHousingPrice"
+            label="Median Dwelling Price"
+          >
+            <InputNumber
+              className="w-full"
+              min={0}
+              step={1000}
+            />
+          </Form.Item>
         </div>
       </Form>
     </Modal>

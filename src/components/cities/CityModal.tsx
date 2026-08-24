@@ -319,6 +319,17 @@ export default function CityModal({
                       : "—",
                 },
                 {
+                  title: "Median Dwelling Price",
+                  dataIndex: "medianHousingPrice",
+                  width: 180,
+                  render: (v) =>
+                    v != null
+                      ? new Intl.NumberFormat(undefined, {
+                          maximumFractionDigits: 0,
+                        }).format(v)
+                      : "—",
+                },
+                {
                   title: "Actions",
                   key: "actions",
                   fixed: "right",

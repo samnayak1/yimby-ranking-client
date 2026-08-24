@@ -5,7 +5,6 @@ export interface Rating {
 
 export interface CityRating {
   year: number;
-
   rating: number;
   permitsIssued?: number;
   permitsPer1000Residents?: number;
@@ -13,6 +12,7 @@ export interface CityRating {
   homesCompleted?: number;
   averagePermitDays?: number;
   population?: number;
+  medianHousingPrice?: number;
 }
 
 export interface UpsertCityRatingBody {
@@ -25,6 +25,7 @@ export interface UpsertCityRatingBody {
   homesCompleted?: number;
   averagePermitDays?: number;
   population?: number;
+  medianHousingPrice?: number;
 }
 export interface UpsertCityRatingInput extends UpsertCityRatingBody {
   id: number;

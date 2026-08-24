@@ -20,20 +20,10 @@ export default function Footer() {
 
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 shrink-0">
             <a
-              href="https://yimbyalliance.org/give/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-yimby-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-yimby-700"
-            >
-
-              Donate to YIMBY Alliance
-            </a>
-
-            <a
               href="https://yimbyaction.org/?form=donate"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-yimby-600 px-4 py-2.5 text-sm font-medium text-yimby-700 hover:bg-yimby-50"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-yimby-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-yimby-700"
             >
               Donate to YIMBY Action
             </a>

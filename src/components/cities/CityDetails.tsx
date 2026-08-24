@@ -6,6 +6,7 @@ import type { City } from '../../types';
 import { getCountryName } from '../../utils/countries.utils';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { responsiveModalProps } from '../../utils/responsive.utils';
+import TrendIcon from '../TrendIcon';
 
 const { Text } = Typography;
 
@@ -105,7 +106,9 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
             </Divider>
             <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
               <Space direction="vertical" className="w-full">
-                {city.ratings.map((rating) => (
+                {city.ratings.map((rating, i) => {
+                  const prev = city.ratings[i + 1];
+                  return (
                   <div
                     key={rating.year}
                     className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4"
@@ -134,7 +137,14 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-sm">
                       <div className="flex justify-between">
                         <Text type="secondary">Permits Issued</Text>
-                        <Text>{rating.permitsIssued ?? "—"}</Text>
+                        <Text>
+                          {rating.permitsIssued ?? "—"}
+                          <TrendIcon
+                            label="Permits issued"
+                            current={rating.permitsIssued}
+                            previous={prev?.permitsIssued}
+                          />
+                        </Text>
                       </div>
 
                       <div className="flex justify-between">
@@ -169,11 +179,37 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
                           {rating.population != null
                             ? new Intl.NumberFormat().format(rating.population)
                             : "—"}
+                          <TrendIcon
+                            label="Population"
+                            current={rating.population}
+                            previous={prev?.population}
+                          />
+                        </Text>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <Text type="secondary">Median Dwelling Price</Text>
+                        <Text>
+                          {rating.medianHousingPrice != null
+                            ? formatPrice(
+                                rating.medianHousingPrice,
+                                city.currency ?? "USD",
+                              )
+                            : "—"}
+                          {/* Cheaper housing is the good outcome here, so the
+                              colour mapping is inverted against the others. */}
+                          <TrendIcon
+                            label="Median dwelling price"
+                            current={rating.medianHousingPrice}
+                            previous={prev?.medianHousingPrice}
+                            invert
+                          />
                         </Text>
                       </div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </Space>
             </div>
           </>

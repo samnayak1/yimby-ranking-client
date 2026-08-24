@@ -29,24 +29,14 @@
   }
 }
 
-/* ---------------------------------------------------------------------------
-   Ant Design overrides.
-   These deliberately sit OUTSIDE any @layer: antd injects its component CSS
-   into <head> at runtime as unlayered rules, and unlayered styles beat layered
-   ones no matter the specificity. Anything here that has to win against antd
-   must therefore be unlayered too (and out-specify antd's own selector).
-   --------------------------------------------------------------------------- */
 
-/* antd's default `.ant-input-number { width: 90px }` beats an equal-specificity
-   Tailwind `w-full`. Every InputNumber in this app asks for full width. */
 .ant-input-number.w-full,
 .ant-input-number-group-wrapper.w-full {
   width: 100%;
 }
 
 @media (max-width: 767px) {
-  /* Tables carry more columns than fit a phone; they scroll horizontally
-     inside their own wrapper, so tighten cells to reduce how far. */
+
   .ant-table {
     font-size: 13px;
   }
@@ -57,26 +47,25 @@
     white-space: nowrap;
   }
 
-  /* Pagination controls wrap instead of overflowing. */
+
   .ant-table-wrapper .ant-pagination {
     flex-wrap: wrap;
     row-gap: 8px;
     justify-content: center;
   }
 
-  /* Descriptions get tighter cells so a 1-column layout stays compact. */
   .ant-descriptions-bordered .ant-descriptions-item-label,
   .ant-descriptions-bordered .ant-descriptions-item-content {
     padding: 8px 12px;
   }
 
-  /* Tab bar scrolls rather than squeezing labels. */
+
   .ant-tabs-top > .ant-tabs-nav .ant-tabs-tab {
     padding: 8px 12px;
     font-size: 14px;
   }
 
-  /* Popups shouldn't exceed the viewport. */
+
   .ant-select-dropdown,
   .ant-picker-dropdown {
     max-width: calc(100vw - 16px);
@@ -94,4 +83,30 @@
   textarea.ant-input {
     font-size: 16px;
   }
+}
+
+
+.yimby-editorial-tabs.ant-tabs-top > .ant-tabs-nav {
+  margin-bottom: 28px;
+}
+
+.yimby-editorial-tabs.ant-tabs-top > .ant-tabs-nav::before {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.yimby-editorial-tabs .ant-tabs-tab {
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.yimby-editorial-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #1f8051;
+  font-weight: 600;
+}
+
+.yimby-editorial-tabs .ant-tabs-ink-bar {
+  background: #1f8051;
+  height: 2px;
 }
