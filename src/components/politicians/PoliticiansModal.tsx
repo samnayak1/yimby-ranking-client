@@ -16,9 +16,13 @@ interface Props {
   editingPolitician?: Politician | null;
 }
 
+// Must stay in sync with the backend's config/options.json — PoliticianService
+// rejects any designation not in that list.
 const DESIGNATIONS = [
   'President', 'Vice President', 'Prime Minister', 'Governor', 'Mayor',
-  'Senator', 'Comptroller', 'Chief Minister', 'Minister', 'MP', 'Councillor', 'Other',
+  'Senator', 'Comptroller', 'Chief Minister', 'Minister', 'MP', 'Councillor',
+  'Representative', 'Assemblyman', 'Alderman', 'Councilmember',
+  'Board Of Supervisors', 'Other',
 ];
 
 const LEANINGS = [
