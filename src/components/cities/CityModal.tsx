@@ -315,7 +315,7 @@ export default function CityModal({
                   width: 140,
                   render: (v) =>
                     v != null
-                      ? new Intl.NumberFormat().format(v)
+                      ? new Intl.NumberFormat('en-US').format(v)
                       : "—",
                 },
                 {
@@ -324,7 +324,7 @@ export default function CityModal({
                   width: 180,
                   render: (v) =>
                     v != null
-                      ? new Intl.NumberFormat(undefined, {
+                      ? new Intl.NumberFormat('en-US', {
                           maximumFractionDigits: 0,
                         }).format(v)
                       : "—",

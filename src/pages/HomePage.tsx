@@ -3,6 +3,7 @@ import { TeamOutlined, GlobalOutlined, PictureOutlined } from '@ant-design/icons
 import PoliticiansTable from '../components/politicians/PoliticiansTable';
 import CitiesView from '../components/cities/CitiesView';
 import BeforeAfterSlider from '../components/cities/BeforeAfterSlider';
+import PermitsPriceChart from '../components/cities/PermitsPriceChart';
 import type { AuthUser } from '../types';
 import Navbar from '../components/NavBar';
 import Footer from '../components/Footer';
@@ -69,7 +70,12 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
                     Media
                   </span>
                 ),
-                children: <BeforeAfterSlider />,
+                children: (
+                  <>
+                    <PermitsPriceChart />
+                    <BeforeAfterSlider />
+                  </>
+                ),
               },
               {
                 key:   'politicians',

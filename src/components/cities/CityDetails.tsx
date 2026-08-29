@@ -177,7 +177,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
                         <Text type="secondary">Population</Text>
                         <Text>
                           {rating.population != null
-                            ? new Intl.NumberFormat().format(rating.population)
+                            ? new Intl.NumberFormat('en-US').format(rating.population)
                             : "—"}
                           <TrendIcon
                             label="Population"
