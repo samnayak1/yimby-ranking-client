@@ -88,21 +88,81 @@ export default function PermitsPriceChart() {
     ]);
   }, [points]);
 
-  const config: ScatterConfig = {
-    data: points,
-    xField: 'price',
-    yField: 'permits',
-    // points bigger with pop
-    sizeField: 'population',
-    height: isMobile ? 340 : 440,
+  // Least-squares fit, drawn as two endpoints across the observed price range.
+  const fit = useMemo(() => {
+    if (points.length < 3) return [];
 
-    style: {
-      shape: 'point',
-      fill: SERIES,
-      fillOpacity: 1,
-      stroke: '#fff', 
-      lineWidth: 2,
-    },
+    const n  = points.length;
+    const mx = points.reduce((t, p) => t + p.price, 0) / n;
+    const my = points.reduce((t, p) => t + p.permits, 0) / n;
+
+    let num = 0, den = 0;
+    for (const p of points) {
+      num += (p.price - mx) * (p.permits - my);
+      den += (p.price - mx) ** 2;
+    }
+    if (den === 0) return [];   
+
+    const slope     = num / den;
+    const intercept = my - slope * mx;
+
+    const xs = points.map(p => p.price);
+    return [Math.min(...xs), Math.max(...xs)].map(price => ({
+      price,
+      permits: intercept + slope * price,
+    }));
+  }, [points]);
+
+  const config: ScatterConfig = {
+    height: isMobile ? 340 : 440,
+    children: [
+      {
+        type: 'point',
+        data: points,
+        xField: 'price',
+        yField: 'permits',
+        // points bigger with pop
+        sizeField: 'population',
+        style: {
+          shape: 'point',
+          fill: SERIES,
+          fillOpacity: 1,
+          stroke: '#fff',
+          lineWidth: 2,
+        },
+        labels: [
+          {
+            text: (d: Point) => (labelled.has(d.city) ? d.city : ''),
+            position: 'right',
+            dx: 8,
+            style: { fill: '#374151', fontSize: 11 },
+          },
+        ],
+        tooltip: {
+          title: (d: Point) => `${d.city} (${d.year})`,
+          items: [
+            { name: 'Permits / 1,000', channel: 'y', valueFormatter: permitFmt },
+            { name: 'Median price',    channel: 'x', valueFormatter: usd },
+            { name: 'Population', field: 'population',
+              valueFormatter: (v: number) => v.toLocaleString('en-US') },
+          ],
+        },
+      },
+      {
+        type: 'line',
+        data: fit,
+        xField: 'price',
+        yField: 'permits',
+        style: {
+          stroke: '#9ca3af',
+          lineWidth: 2,
+          lineDash: [2, 4],
+          lineCap: 'round',
+        },
+        
+        tooltip: false,
+      },
+    ],
     scale: {
 
       x: { nice: true, zero: false },
@@ -120,24 +180,6 @@ export default function PermitsPriceChart() {
         labelFormatter: (v: number) => permitFmt(v),
         tickCount: 5,
       },
-    },
-    labels: [
-      {
-        text: (d: Point) => (labelled.has(d.city) ? d.city : ''),
-        position: 'right',
-        dx: 8,
-    
-        style: { fill: '#374151', fontSize: 11 },
-      },
-    ],
-    tooltip: {
-      title: (d: Point) => `${d.city} (${d.year})`,
-      items: [
-        { name: 'Permits / 1,000', channel: 'y', valueFormatter: permitFmt },
-        { name: 'Median price',    channel: 'x', valueFormatter: usd },
-        { name: 'Population', field: 'population',
-          valueFormatter: (v: number) => v.toLocaleString('en-US') },
-      ],
     },
     interaction: {
 
