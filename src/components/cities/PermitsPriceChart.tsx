@@ -88,28 +88,28 @@ export default function PermitsPriceChart() {
     ]);
   }, [points]);
 
-  // Least-squares fit, drawn as two endpoints across the observed price range.
+  // Least-squares fit
   const fit = useMemo(() => {
     if (points.length < 3) return [];
 
     const n  = points.length;
-    const mx = points.reduce((t, p) => t + p.price, 0) / n;
-    const my = points.reduce((t, p) => t + p.permits, 0) / n;
+    const mx = points.reduce((t, p) => t + p.permits, 0) / n;
+    const my = points.reduce((t, p) => t + p.price, 0) / n;
 
     let num = 0, den = 0;
     for (const p of points) {
-      num += (p.price - mx) * (p.permits - my);
-      den += (p.price - mx) ** 2;
+      num += (p.permits - mx) * (p.price - my);
+      den += (p.permits - mx) ** 2;
     }
-    if (den === 0) return [];   
+    if (den === 0) return [];
 
     const slope     = num / den;
     const intercept = my - slope * mx;
 
-    const xs = points.map(p => p.price);
-    return [Math.min(...xs), Math.max(...xs)].map(price => ({
-      price,
-      permits: intercept + slope * price,
+    const xs = points.map(p => p.permits);
+    return [Math.min(...xs), Math.max(...xs)].map(permits => ({
+      permits,
+      price: intercept + slope * permits,
     }));
   }, [points]);
 
@@ -119,8 +119,8 @@ export default function PermitsPriceChart() {
       {
         type: 'point',
         data: points,
-        xField: 'price',
-        yField: 'permits',
+        xField: 'permits',
+        yField: 'price',
         // points bigger with pop
         sizeField: 'population',
         style: {
@@ -141,8 +141,8 @@ export default function PermitsPriceChart() {
         tooltip: {
           title: (d: Point) => `${d.city} (${d.year})`,
           items: [
-            { name: 'Permits / 1,000', channel: 'y', valueFormatter: permitFmt },
-            { name: 'Median price',    channel: 'x', valueFormatter: usd },
+            { name: 'Median price',    channel: 'y', valueFormatter: usd },
+            { name: 'Permits / 1,000', channel: 'x', valueFormatter: permitFmt },
             { name: 'Population', field: 'population',
               valueFormatter: (v: number) => v.toLocaleString('en-US') },
           ],
@@ -151,8 +151,8 @@ export default function PermitsPriceChart() {
       {
         type: 'line',
         data: fit,
-        xField: 'price',
-        yField: 'permits',
+        xField: 'permits',
+        yField: 'price',
         style: {
           stroke: '#9ca3af',
           lineWidth: 2,
@@ -165,19 +165,19 @@ export default function PermitsPriceChart() {
     ],
     scale: {
 
-      x: { nice: true, zero: false },
-      y: { nice: true, domainMin: 0 },
+      x: { nice: true, domainMin: 0 },
+      y: { nice: true, zero: false },
       size: { range: [4, 16] },
     },
     axis: {
       x: {
-        title: 'Median housing price (USD)',
-        labelFormatter: (v: number) => usdCompact(v),
+        title: 'Permits per 1,000 residents',
+        labelFormatter: (v: number) => permitFmt(v),
         tickCount: isMobile ? 3 : 5,
       },
       y: {
-        title: 'Permits per 1,000 residents',
-        labelFormatter: (v: number) => permitFmt(v),
+        title: 'Median housing price (USD)',
+        labelFormatter: (v: number) => usdCompact(v),
         tickCount: 5,
       },
     },
@@ -190,7 +190,7 @@ export default function PermitsPriceChart() {
   return (
     <section className="py-2 sm:py-4">
       <h3 className="text-base sm:text-lg font-semibold text-gray-800">
-        Permits per 1,000 residents vs. median housing price
+        Median housing price vs. permits per 1,000 residents
       </h3>
 
       <div className="mt-4">
