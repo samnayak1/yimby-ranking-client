@@ -4,6 +4,19 @@
 {$SITE_ADDRESS::80} {
 	encode gzip
 
+	# JSON access log, read by scripts/caddy_stats.py on the host for latency
+	# percentiles and error rates. Rolled at 10 MiB, 5 kept (~50 MiB worst case).
+	# 0644 so the script can read it without sudo; Caddy redacts Authorization
+	# and Cookie headers by default.
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 10MiB
+			roll_keep 5
+			mode 0644
+		}
+		format json
+	}
+
 	root * /usr/share/caddy
 
 	request_body {
@@ -30,4 +43,11 @@
 		try_files {path} /index.html
 		file_server
 	}
+}
+
+# GoatCounter: the dashboard, plus /count and /count.js that the site's
+# tracking script calls. Needs its own DNS record pointing at this instance.
+{$STATS_ADDRESS:stats.yimby-tracker.fyi} {
+	encode gzip
+	reverse_proxy goatcounter:8080
 }

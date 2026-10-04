@@ -105,3 +105,12 @@ export const citiesApi = {
       currencies: string[];
     }>('/cities/filter/filter-options'),
 };
+export interface ContactBody {
+  message: string;
+  contact?: string;
+  website?: string;
+}
+
+export const contactApi = {
+  send: (body: ContactBody) => client.post<{ ok: true }>('/contact', body),
+};
