@@ -1,10 +1,18 @@
 @import "tailwindcss";
 
 @theme {
+  /* Tailwind v4 reads colours from here, not tailwind.config.js. A shade
+     missing from this list compiles to nothing — no error, no colour. */
   --color-yimby-50: #f0faf4;
   --color-yimby-100: #d9f2e3;
+  --color-yimby-200: #b3e6c9;
+  --color-yimby-300: #7dd3a8;
+  --color-yimby-400: #4aba84;
   --color-yimby-500: #2da066;
   --color-yimby-600: #1f8051;
+  --color-yimby-700: #1a6641;
+  --color-yimby-800: #175235;
+  --color-yimby-900: #14432c;
 
   --font-sans: Inter, sans-serif;
 }

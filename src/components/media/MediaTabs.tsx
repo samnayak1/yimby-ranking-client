@@ -3,6 +3,7 @@ import { Tabs } from 'antd';
 import PermitsPriceChart from '../cities/PermitsPriceChart';
 import BeforeAfterSlider from '../cities/BeforeAfterSlider';
 import { CreatorsSection, ResourcesSection } from './MediaLists';
+import HousingSign from './HousingSign';
 import { useCreators, useResources } from '../../hooks/media.hook';
 import { useIsMobile } from '../../hooks/useIsMobile';
 
@@ -20,7 +21,20 @@ export default function MediaTabs({ isAdmin }: { isAdmin: boolean }) {
   const resources = useResources();
 
   const tabs: SubTab[] = [
-    { key: 'chart',   label: 'Permits vs. price', content: <PermitsPriceChart /> },
+    {
+      key: 'chart',
+      label: 'Permits vs. price',
+      // Side by side from lg up. Below that there isn't room for both, so the
+      // sign drops under the chart and its arrow points up instead.
+      content: (
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:gap-4">
+          <div className="min-w-0 lg:flex-1">
+            <PermitsPriceChart />
+          </div>
+          <HousingSign className="mx-auto shrink-0 lg:mx-0" />
+        </div>
+      ),
+    },
     { key: 'compare', label: 'Before & after',    content: <BeforeAfterSlider /> },
     {
       key: 'creators',
