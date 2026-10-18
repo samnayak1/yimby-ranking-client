@@ -208,16 +208,18 @@ export const statusLabels: Record<PoliticianStatus, string> = {
 };
 export type ResourceCategory = 'website' | 'article' | 'study';
 
+export type CreatorPlatform = 'youtube' | 'x' | 'instagram' | 'bluesky' | 'website';
+export type CreatorTag = 'transit' | 'urbanism' | 'econ' | 'policy';
+
 export interface Creator {
-  id:           number;
-  name:         string;
-  description:  string | null;
-  instagramUrl: string | null;
-  youtubeUrl:   string | null;
-  twitterUrl:   string | null;
-  blueskyUrl:   string | null;
-  websiteUrl:   string | null;
-  sortOrder:    number;
+  id:          number;
+  name:        string;
+  description: string | null;
+  platform:    CreatorPlatform;
+  url:         string;
+  tags:        CreatorTag[];
+  nationalityCode: string | null;
+  sortOrder:   number;
 }
 
 export interface Resource {
@@ -232,5 +234,5 @@ export interface Resource {
 }
 
 // Optional fields accept "" so a cleared form field removes the stored value.
-export type CreatorInput  = Partial<Omit<Creator, 'id'>> & { name: string };
+export type CreatorInput  = Partial<Omit<Creator, 'id'>> & { name: string; platform: CreatorPlatform; url: string };
 export type ResourceInput = Partial<Omit<Resource, 'id'>> & { category: ResourceCategory; title: string; url: string };

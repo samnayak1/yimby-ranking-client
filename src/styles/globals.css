@@ -94,19 +94,56 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.yimby-editorial-tabs .ant-tabs-tab {
+.yimby-editorial-tabs > .ant-tabs-nav .ant-tabs-tab {
   padding: 12px 0;
   font-size: 15px;
   font-weight: 500;
   color: #4b5563;
 }
 
-.yimby-editorial-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+.yimby-editorial-tabs > .ant-tabs-nav .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
   color: #1f8051;
   font-weight: 600;
 }
 
-.yimby-editorial-tabs .ant-tabs-ink-bar {
+.yimby-editorial-tabs > .ant-tabs-nav .ant-tabs-ink-bar {
   background: #1f8051;
   height: 2px;
+}
+
+/* Media sub-tabs: pills, visibly a level below the underlined top tabs. */
+.yimby-subtabs.ant-tabs-top > .ant-tabs-nav {
+  margin-bottom: 24px;
+}
+
+.yimby-subtabs.ant-tabs-top > .ant-tabs-nav::before {
+  border-bottom: none;
+}
+
+.yimby-subtabs > .ant-tabs-nav .ant-tabs-ink-bar {
+  display: none;
+}
+
+.yimby-subtabs > .ant-tabs-nav .ant-tabs-tab {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: #f3f4f6;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.yimby-subtabs > .ant-tabs-nav .ant-tabs-tab:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.yimby-subtabs > .ant-tabs-nav .ant-tabs-tab.ant-tabs-tab-active {
+  background: #d8f3e3;
+}
+
+.yimby-subtabs > .ant-tabs-nav .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #1a6641;
+  font-weight: 600;
 }

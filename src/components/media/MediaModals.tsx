@@ -1,7 +1,10 @@
 import { useEffect } from 'react';
-import { Form, Input, InputNumber, Modal, Select, message } from 'antd';
+import { Form, Input, InputNumber, Modal, Select, Tag, message } from 'antd';
 import type { Rule } from 'antd/es/form';
-import type { Creator, CreatorInput, Resource, ResourceCategory, ResourceInput } from '../../types';
+import type { Creator, CreatorInput, CreatorPlatform, CreatorTag, Resource, ResourceCategory, ResourceInput } from '../../types';
+import { CREATOR_TAGS, PLATFORMS, urlMatchesPlatform } from './mediaStyles';
+import Flag from '../Flag';
+import { countryOptions } from '../../utils/countries.utils';
 import { useSaveCreator, useSaveResource } from '../../hooks/media.hook';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { responsiveModalProps } from '../../utils/responsive.utils';
@@ -11,14 +14,6 @@ const urlRule: Rule = {
   pattern: /^https?:\/\/[^\s/$.?#].[^\s]*$/i,
   message: 'Use a full link starting with https://',
 };
-
-const CREATOR_LINKS = [
-  { name: 'instagramUrl', label: 'Instagram', placeholder: 'https://instagram.com/…' },
-  { name: 'youtubeUrl',   label: 'YouTube',   placeholder: 'https://youtube.com/@…' },
-  { name: 'twitterUrl',   label: 'X / Twitter', placeholder: 'https://x.com/…' },
-  { name: 'blueskyUrl',   label: 'Bluesky',   placeholder: 'https://bsky.app/profile/…' },
-  { name: 'websiteUrl',   label: 'Website',   placeholder: 'https://…' },
-] as const;
 
 /**
  * An untouched antd field is `undefined`, which JSON drops — on a PATCH that
@@ -44,21 +39,26 @@ export function CreatorModal({ open, editing, onClose }: CreatorModalProps) {
   const isMobile = useIsMobile();
   const [form] = Form.useForm<CreatorInput>();
   const save = useSaveCreator();
+  const platform: CreatorPlatform = Form.useWatch('platform', form) ?? 'youtube';
 
   useEffect(() => {
     if (!open) return;
     if (editing) form.setFieldsValue(editing);
-    else form.resetFields();
+    else {
+      form.resetFields();
+      form.setFieldsValue({ platform: 'youtube', tags: [], sortOrder: 0 });
+    }
   }, [open, editing, form]);
+
+  // Re-check the link when the platform changes, so a stale error doesn't linger.
+  useEffect(() => {
+    if (open && form.getFieldValue('url')) form.validateFields(['url']).catch(() => {});
+  }, [platform, open, form]);
 
   const handleOk = async () => {
     const values = await form.validateFields();
-    if (!CREATOR_LINKS.some(l => (values[l.name] as string | undefined)?.trim())) {
-      message.error('Add at least one link');
-      return;
-    }
     try {
-      const body = withNulls(values, ['description', ...CREATOR_LINKS.map(l => l.name)]);
+      const body = withNulls(values, ['description', 'nationalityCode']);
       await save.mutateAsync({ id: editing?.id, body });
       message.success(editing ? 'Creator updated' : 'Creator added');
       onClose();
@@ -78,20 +78,87 @@ export function CreatorModal({ open, editing, onClose }: CreatorModalProps) {
       {...responsiveModalProps(isMobile, 560)}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" initialValues={{ sortOrder: 0 }}>
+      <Form form={form} layout="vertical">
         <Form.Item name="name" label="Name" rules={[{ required: true, whitespace: true, message: 'Name is required' }]}>
-          <Input maxLength={120} placeholder="e.g. City Nerd" />
+          <Input maxLength={120} placeholder="e.g. Oh the Urbanity" />
+        </Form.Item>
+
+        <Form.Item name="nationalityCode" label="Nationality" tooltip="Optional. Shown as a small flag next to their name.">
+          <Select
+            showSearch
+            allowClear
+            placeholder="Search for a country"
+            optionFilterProp="search"
+            options={countryOptions.map(c => ({
+              value: c.value,
+              search: `${c.label} ${c.value}`,
+              label: (
+                <span className="flex items-center gap-2">
+                  <Flag code={c.value} />
+                  {c.label}
+                </span>
+              ),
+            }))}
+          />
+        </Form.Item>
+
+        <Form.Item name="platform" label="Platform" rules={[{ required: true }]}>
+          <Select
+            options={(Object.keys(PLATFORMS) as CreatorPlatform[]).map(p => ({
+              value: p,
+              label: (
+                <span className="flex items-center gap-2">
+                  {PLATFORMS[p].icon}
+                  {PLATFORMS[p].label}
+                </span>
+              ),
+            }))}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="url"
+          label={`${PLATFORMS[platform].label} link`}
+          rules={[
+            { required: true, message: 'Link is required' },
+            urlRule,
+            {
+              validator: (_, value?: string) =>
+                !value || urlMatchesPlatform(platform, value)
+                  ? Promise.resolve()
+                  : Promise.reject(new Error(`That isn't a ${PLATFORMS[platform].label} link`)),
+            },
+          ]}
+        >
+          <Input maxLength={500} placeholder={PLATFORMS[platform].placeholder} />
+        </Form.Item>
+
+        <Form.Item name="tags" label="Topics" tooltip="What they mostly talk about. Pick any that apply.">
+          <Select
+            mode="multiple"
+            allowClear
+            placeholder="Transit, urbanism, econ, policy"
+            options={(Object.keys(CREATOR_TAGS) as CreatorTag[]).map(t => ({
+              value: t,
+              label: `${CREATOR_TAGS[t].label} — ${CREATOR_TAGS[t].hint}`,
+            }))}
+            optionLabelProp="value"
+            tagRender={({ value, closable, onClose: close }) => (
+              <Tag
+                color={CREATOR_TAGS[value as CreatorTag]?.color}
+                closable={closable}
+                onClose={close}
+                className="me-1"
+              >
+                {CREATOR_TAGS[value as CreatorTag]?.label ?? value}
+              </Tag>
+            )}
+          />
         </Form.Item>
 
         <Form.Item name="description" label="Short description">
           <Input.TextArea maxLength={500} rows={2} showCount placeholder="What they cover, in a sentence" />
         </Form.Item>
-
-        {CREATOR_LINKS.map(l => (
-          <Form.Item key={l.name} name={l.name} label={l.label} rules={[urlRule]}>
-            <Input maxLength={500} placeholder={l.placeholder} allowClear />
-          </Form.Item>
-        ))}
 
         <Form.Item name="sortOrder" label="Sort order" tooltip="Lower numbers appear first. Use a negative number to pin to the top.">
           <InputNumber min={-1000} max={1000} className="w-full" />

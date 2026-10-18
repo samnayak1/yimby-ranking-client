@@ -1,30 +1,12 @@
-import { useState, type ReactNode } from 'react';
-import { Button, Popconfirm, Skeleton, message } from 'antd';
-import {
-  DeleteOutlined, EditOutlined, GlobalOutlined, InstagramOutlined, PlusOutlined,
-  XOutlined, YoutubeOutlined,
-} from '@ant-design/icons';
-import type { Creator, Resource, ResourceCategory } from '../../types';
+import { useState } from 'react';
+import { Button, Popconfirm, Skeleton, Tag, message } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import type { Creator, CreatorPlatform, Resource } from '../../types';
 import { useCreators, useDeleteCreator, useDeleteResource, useResources } from '../../hooks/media.hook';
 import { hostOf, safeHref } from '../../utils/safeUrl';
 import { CreatorModal, ResourceModal } from './MediaModals';
-
-// Bluesky butterfly (Simple Icons, CC0). antd ships no Bluesky icon.
-function BlueskyIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true">
-      <path d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565.139 1.908 0 3.08 0 3.768c0 .69.378 5.65.624 6.479.815 2.736 3.713 3.66 6.383 3.364.136-.02.275-.039.415-.056-.138.022-.276.04-.415.056-3.912.58-7.387 2.005-2.83 7.078 5.013 5.19 6.87-1.113 7.823-4.308.953 3.195 2.05 9.271 7.733 4.308 4.267-4.308 1.172-6.498-2.74-7.078a8.741 8.741 0 0 1-.415-.056c.14.017.279.036.415.056 2.67.297 5.568-.628 6.383-3.364.246-.828.624-5.79.624-6.478 0-.69-.139-1.861-.902-2.206-.659-.298-1.664-.62-4.3 1.24C16.046 4.748 13.087 8.687 12 10.8Z" />
-    </svg>
-  );
-}
-
-const SOCIALS: { key: keyof Creator; label: string; icon: ReactNode }[] = [
-  { key: 'instagramUrl', label: 'Instagram', icon: <InstagramOutlined /> },
-  { key: 'youtubeUrl',   label: 'YouTube',   icon: <YoutubeOutlined /> },
-  { key: 'twitterUrl',   label: 'X',         icon: <XOutlined /> },
-  { key: 'blueskyUrl',   label: 'Bluesky',   icon: <BlueskyIcon /> },
-  { key: 'websiteUrl',   label: 'Website',   icon: <GlobalOutlined /> },
-];
+import { CREATOR_TAGS, PLATFORMS, RESOURCE_CATEGORIES } from './mediaStyles';
+import Flag from '../Flag';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -35,6 +17,30 @@ function formatPublished(value: string | null): string | null {
   if (!m) return y;
   const month = MONTHS[Number(m) - 1] ?? m;
   return d ? `${month} ${Number(d)}, ${y}` : `${month} ${y}`;
+}
+
+/**
+ * The account name as people know it: youtube.com/@OhTheUrbanity → @OhTheUrbanity,
+ * x.com/sam_d_1995 → @sam_d_1995. Websites show their domain.
+ */
+function handleOf(platform: CreatorPlatform, url: string): string {
+  let path: string[];
+  try {
+    path = new URL(url).pathname.split('/').filter(Boolean);
+  } catch {
+    return '';
+  }
+  if (platform === 'website') return hostOf(url);
+  if (platform === 'bluesky') return path[0] === 'profile' && path[1] ? `@${path[1]}` : '';
+  const first = path[0] ?? '';
+  if (!first) return '';
+  return first.startsWith('@') ? first : `@${first}`;
+}
+
+function initialsOf(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  const letters = words.length > 1 ? words[0][0] + words[words.length - 1][0] : (words[0] ?? '').slice(0, 2);
+  return letters.toUpperCase();
 }
 
 function SectionHeader({ title, intro, onAdd }: { title: string; intro?: string; onAdd?: () => void }) {
@@ -91,36 +97,68 @@ export function CreatorsSection({ isAdmin }: { isAdmin: boolean }) {
       ) : data.length === 0 ? (
         <p className="text-sm text-gray-400">No creators yet.</p>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map(c => (
-            <li key={c.id} className="flex gap-3 rounded-lg border border-gray-200 p-4">
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-gray-900">{c.name}</p>
-                {c.description && <p className="mt-1 text-sm text-gray-600">{c.description}</p>}
-                <div className="mt-3 flex flex-wrap gap-3 text-lg">
-                  {SOCIALS.map(s => {
-                    const href = safeHref(c[s.key] as string | null);
-                    return href ? (
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {data.map(c => {
+            const platform = PLATFORMS[c.platform];
+            const href = safeHref(c.url);
+            const handle = handleOf(c.platform, c.url);
+            return (
+              <li
+                key={c.id}
+                className="flex gap-3 rounded-lg border-2 border-dotted bg-white p-4"
+                style={{ borderColor: platform.border }}
+              >
+                <div
+                  aria-hidden="true"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-semibold text-gray-700"
+                >
+                  {initialsOf(c.name)}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    {href ? (
                       <a
-                        key={s.key}
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={`${c.name} on ${s.label}`}
-                        title={s.label}
-                        className="text-gray-500 hover:text-yimby-700"
+                        className="min-w-0 truncate font-semibold text-gray-900 underline-offset-2 hover:text-yimby-700 hover:underline"
                       >
-                        {s.icon}
+                        {c.name}
                       </a>
-                    ) : null;
-                  })}
+                    ) : (
+                      <span className="min-w-0 truncate font-semibold text-gray-900">{c.name}</span>
+                    )}
+                    <Flag code={c.nationalityCode} className="text-[0.85em]" />
+                  </div>
+
+                  {/* Icon in the platform colour, text in ink: brand red on white
+                      is too low-contrast for small text. */}
+                  <p className="mt-0.5 flex items-center gap-1.5 text-xs text-gray-500">
+                    <span style={{ color: platform.border }} className="text-sm leading-none">{platform.icon}</span>
+                    <span>{platform.label}</span>
+                    {handle && <span className="truncate">· {handle}</span>}
+                  </p>
+
+                  {c.description && <p className="mt-2 text-sm text-gray-600">{c.description}</p>}
+
+                  {c.tags.length > 0 && (
+                    <div className="mt-2.5 flex flex-wrap gap-1">
+                      {c.tags.map(t => (
+                        <Tag key={t} color={CREATOR_TAGS[t]?.color} bordered={false} className="m-0" title={CREATOR_TAGS[t]?.hint}>
+                          {CREATOR_TAGS[t]?.label ?? t}
+                        </Tag>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-              {isAdmin && (
-                <AdminActions label={c.name} onEdit={() => setModal({ open: true, editing: c })} onDelete={() => onDelete(c)} />
-              )}
-            </li>
-          ))}
+
+                {isAdmin && (
+                  <AdminActions label={c.name} onEdit={() => setModal({ open: true, editing: c })} onDelete={() => onDelete(c)} />
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 
@@ -131,19 +169,15 @@ export function CreatorsSection({ isAdmin }: { isAdmin: boolean }) {
   );
 }
 
-interface ResourcesSectionProps {
-  isAdmin: boolean;
-  category: ResourceCategory;
-  title: string;
-  intro?: string;
-}
-
-export function ResourcesSection({ isAdmin, category, title, intro }: ResourcesSectionProps) {
-  const { data: all = [], isLoading } = useResources();
+/**
+ * News, studies and websites in one list. The backend already orders it:
+ * pinned (negative sort order) first, then newest, with undated links such as
+ * websites after dated ones.
+ */
+export function ResourcesSection({ isAdmin }: { isAdmin: boolean }) {
+  const { data: items = [], isLoading } = useResources();
   const remove = useDeleteResource();
   const [modal, setModal] = useState<{ open: boolean; editing: Resource | null }>({ open: false, editing: null });
-
-  const items = all.filter(r => r.category === category);
 
   if (!isLoading && items.length === 0 && !isAdmin) return null;
 
@@ -159,8 +193,8 @@ export function ResourcesSection({ isAdmin, category, title, intro }: ResourcesS
   return (
     <section>
       <SectionHeader
-        title={title}
-        intro={intro}
+        title="Articles, studies and websites"
+        intro="News coverage, research, and games, maps and tools about housing and cities."
         onAdd={isAdmin ? () => setModal({ open: true, editing: null }) : undefined}
       />
 
@@ -169,13 +203,21 @@ export function ResourcesSection({ isAdmin, category, title, intro }: ResourcesS
       ) : items.length === 0 ? (
         <p className="text-sm text-gray-400">Nothing here yet.</p>
       ) : (
-        <ul className="divide-y divide-gray-100 rounded-lg border border-gray-200">
+        <ul className="space-y-3">
           {items.map(r => {
             const href = safeHref(r.url);
             const meta = [r.source, formatPublished(r.publishedOn), hostOf(r.url)].filter(Boolean).join(' · ');
+            const category = RESOURCE_CATEGORIES[r.category];
             return (
-              <li key={r.id} className="flex gap-3 p-4">
+              <li
+                key={r.id}
+                className="flex gap-3 rounded-lg border-2 border-dotted bg-white p-4"
+                style={{ borderColor: category.border }}
+              >
                 <div className="min-w-0 flex-1">
+                  <div className="mb-1.5">
+                    <Tag color={category.tag} bordered={false} className="m-0">{category.label}</Tag>
+                  </div>
                   {href ? (
                     <a
                       href={href}
@@ -204,7 +246,7 @@ export function ResourcesSection({ isAdmin, category, title, intro }: ResourcesS
         <ResourceModal
           open={modal.open}
           editing={modal.editing}
-          defaultCategory={category}
+          defaultCategory="article"
           onClose={() => setModal({ open: false, editing: null })}
         />
       )}

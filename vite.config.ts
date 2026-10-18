@@ -16,4 +16,12 @@ export default defineConfig({
     },
     hmr: hmrClientPort ? { clientPort: Number(hmrClientPort) } : undefined,
   },
+  build: {
+    // Vite inlines assets under 4 KB into whatever references them. For
+    // flag-icons that means ~400 flags base64'd into the main stylesheet, which
+    // every visitor would download. Kept as files, a browser fetches only the
+    // flags actually on screen. Returning undefined keeps the default for
+    // everything else.
+    assetsInlineLimit: file => (file.includes("flag-icons") ? false : undefined),
+  },
 });
