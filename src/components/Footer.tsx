@@ -1,34 +1,45 @@
 import { useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { contactApi } from '../services/api.service';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 const MAX_MESSAGE = 2000;
 
+// Loose on purpose — the backend does the real validation. This only keeps the
+// Send button disabled until the field plausibly holds an address.
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 function ContactForm() {
   const [message, setMessage] = useState('');
-  const [contact, setContact] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [website, setWebsite] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState('');
 
-  const tooShort = message.trim().length < 5;
+  const canSend =
+    name.trim().length > 0 &&
+    EMAIL_PATTERN.test(email.trim()) &&
+    message.trim().length >= 5;
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (tooShort || status === 'sending') return;
+    if (!canSend || status === 'sending') return;
 
     setStatus('sending');
     setError('');
     try {
       await contactApi.send({
+        name: name.trim(),
+        email: email.trim(),
         message: message.trim(),
-        contact: contact.trim() || undefined,
         website: website || undefined,
       });
       setStatus('sent');
       setMessage('');
-      setContact('');
+      setName('');
+      setEmail('');
     } catch (err) {
       setStatus('error');
       setError((err as Error).message || 'Something went wrong. Please try again later.');
@@ -67,15 +78,30 @@ function ContactForm() {
         className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:border-yimby-500 focus:outline-none focus:ring-2 focus:ring-yimby-200"
       />
 
-      <input
-        type="text"
-        value={contact}
-        onChange={e => setContact(e.target.value)}
-        maxLength={200}
-        aria-label="How to reach you (optional)"
-        placeholder="Email or Telegram handle, if you'd like a reply (optional)"
-        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:border-yimby-500 focus:outline-none focus:ring-2 focus:ring-yimby-200"
-      />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <input
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          maxLength={100}
+          required
+          autoComplete="name"
+          aria-label="Your name"
+          placeholder="Your name"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:border-yimby-500 focus:outline-none focus:ring-2 focus:ring-yimby-200"
+        />
+        <input
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          maxLength={200}
+          required
+          autoComplete="email"
+          aria-label="Your email"
+          placeholder="Your email"
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm sm:text-base text-gray-900 placeholder:text-gray-400 focus:border-yimby-500 focus:outline-none focus:ring-2 focus:ring-yimby-200"
+        />
+      </div>
 
       {/* Honeypot: off-screen and skipped by keyboard and screen readers, so
           only bots fill it. */}
@@ -93,7 +119,7 @@ function ContactForm() {
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="submit"
-          disabled={tooShort || status === 'sending'}
+          disabled={!canSend || status === 'sending'}
           className="inline-flex items-center justify-center rounded-lg bg-yimby-600 px-5 py-2.5 text-sm sm:text-base font-medium text-white hover:bg-yimby-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {status === 'sending' ? 'Sending…' : 'Send'}
@@ -142,6 +168,15 @@ export default function Footer() {
 
         <div className="relative mt-8 border-t border-gray-100 pt-6">
           <ContactForm />
+        </div>
+
+        <div className="mt-8 text-sm text-gray-500">
+          <Link
+            to="/privacy"
+            className="underline underline-offset-2 hover:text-gray-700"
+          >
+            Privacy policy
+          </Link>
         </div>
       </div>
     </footer>

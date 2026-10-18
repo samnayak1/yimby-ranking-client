@@ -3,6 +3,7 @@ import { ConfigProvider } from 'antd';
 
 import LoginPage from './pages/LoginPage';
 import HomePage  from './pages/HomePage';
+import PrivacyPage from './pages/PrivacyPage';
 import { useAuth } from './hooks/auth.hook';
 
 const antTheme = {
@@ -45,6 +46,11 @@ export default function App() {
                 ? <Navigate to="/" replace />
                 : <LoginPage onSuccess={reload} />
             }
+          />
+
+          <Route
+            path="/privacy"
+            element={<PrivacyPage user={user} onLogout={reload} />}
           />
 
           {/* Anything else → home */}

@@ -106,8 +106,9 @@ export const citiesApi = {
     }>('/cities/filter/filter-options'),
 };
 export interface ContactBody {
+  name: string;
+  email: string;
   message: string;
-  contact?: string;
   website?: string;
 }
 
