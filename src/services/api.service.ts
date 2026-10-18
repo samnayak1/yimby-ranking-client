@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getAccessToken } from './auth.service';
-import type { ApiResponse, City, CityMapPoint, PaginatedResponse, Politician, UpsertCityBody, UpsertCityInput, UpsertCityRatingBody, UpsertPoliticianBody, UpsertPoliticianInput } from '../types';
+import type { ApiResponse, Creator, CreatorInput, Resource, ResourceCategory, ResourceInput, City, CityMapPoint, PaginatedResponse, Politician, UpsertCityBody, UpsertCityInput, UpsertCityRatingBody, UpsertPoliticianBody, UpsertPoliticianInput } from '../types';
 
 const client = axios.create({
     baseURL: '/api',
@@ -114,4 +114,21 @@ export interface ContactBody {
 
 export const contactApi = {
   send: (body: ContactBody) => client.post<{ ok: true }>('/contact', body),
+};
+
+export const creatorsApi = {
+  getAll: () => client.get<ApiResponse<Creator[]>>('/creators').then(r => r.data.data),
+  create: (body: CreatorInput) => client.post<ApiResponse<Creator>>('/creators', body).then(r => r.data.data),
+  update: (id: number, body: Partial<CreatorInput>) =>
+    client.patch<ApiResponse<Creator>>(`/creators/${id}`, body).then(r => r.data.data),
+  delete: (id: number) => client.delete<void>(`/creators/${id}`),
+};
+
+export const resourcesApi = {
+  getAll: (category?: ResourceCategory) =>
+    client.get<ApiResponse<Resource[]>>('/resources', { params: { category } }).then(r => r.data.data),
+  create: (body: ResourceInput) => client.post<ApiResponse<Resource>>('/resources', body).then(r => r.data.data),
+  update: (id: number, body: Partial<ResourceInput>) =>
+    client.patch<ApiResponse<Resource>>(`/resources/${id}`, body).then(r => r.data.data),
+  delete: (id: number) => client.delete<void>(`/resources/${id}`),
 };

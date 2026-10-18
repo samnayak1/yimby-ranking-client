@@ -13,6 +13,7 @@ export interface CityRating {
   averagePermitDays?: number;
   population?: number;
   medianHousingPrice?: number;
+  vacancyRate?: number;
 }
 
 export interface UpsertCityRatingBody {
@@ -26,6 +27,7 @@ export interface UpsertCityRatingBody {
   averagePermitDays?: number;
   population?: number;
   medianHousingPrice?: number;
+  vacancyRate?: number;
 }
 export interface UpsertCityRatingInput extends UpsertCityRatingBody {
   id: number;
@@ -204,3 +206,31 @@ export const statusLabels: Record<PoliticianStatus, string> = {
   RETIRED: "Retired",
   OUT: "Out of Office",
 };
+export type ResourceCategory = 'website' | 'article' | 'study';
+
+export interface Creator {
+  id:           number;
+  name:         string;
+  description:  string | null;
+  instagramUrl: string | null;
+  youtubeUrl:   string | null;
+  twitterUrl:   string | null;
+  blueskyUrl:   string | null;
+  websiteUrl:   string | null;
+  sortOrder:    number;
+}
+
+export interface Resource {
+  id:          number;
+  category:    ResourceCategory;
+  title:       string;
+  url:         string;
+  description: string | null;
+  source:      string | null;
+  publishedOn: string | null;
+  sortOrder:   number;
+}
+
+// Optional fields accept "" so a cleared form field removes the stored value.
+export type CreatorInput  = Partial<Omit<Creator, 'id'>> & { name: string };
+export type ResourceInput = Partial<Omit<Resource, 'id'>> & { category: ResourceCategory; title: string; url: string };

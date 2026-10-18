@@ -4,6 +4,7 @@ import PoliticiansTable from '../components/politicians/PoliticiansTable';
 import CitiesView from '../components/cities/CitiesView';
 import BeforeAfterSlider from '../components/cities/BeforeAfterSlider';
 import PermitsPriceChart from '../components/cities/PermitsPriceChart';
+import { CreatorsSection, ResourcesSection } from '../components/media/MediaLists';
 import type { AuthUser } from '../types';
 import Navbar from '../components/NavBar';
 import Footer from '../components/Footer';
@@ -71,10 +72,19 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
                   </span>
                 ),
                 children: (
-                  <>
+                  <div className="space-y-12 sm:space-y-16">
                     <PermitsPriceChart />
                     <BeforeAfterSlider />
-                  </>
+                    <CreatorsSection isAdmin={isAdmin} />
+                    <ResourcesSection
+                      isAdmin={isAdmin}
+                      category="website"
+                      title="Websites to explore"
+                      intro="Games, maps and tools about housing and cities."
+                    />
+                    <ResourcesSection isAdmin={isAdmin} category="article" title="News articles" />
+                    <ResourcesSection isAdmin={isAdmin} category="study" title="Studies and research" />
+                  </div>
                 ),
               },
               {

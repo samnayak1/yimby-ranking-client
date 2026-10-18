@@ -9,6 +9,8 @@ import seattleBefore from '../../assets/seattle-pic-1.png';
 import seattleAfter from '../../assets/seattle-pic-2.png';
 import brickellBefore from '../../assets/brickell-pic-1.png';
 import brickellAfter from '../../assets/brickell-pic-2.png';
+import raleighBefore from '../../assets/raleigh-pic-1.png';
+import raleighAfter from '../../assets/raleigh-pic-2.png';
 
 const PAIRS = [
   {
@@ -28,6 +30,12 @@ const PAIRS = [
     before: brickellBefore,
     after: brickellAfter,
     caption: 'Brickell (Miami) — Google Maps imagery (2007 vs 2025)',
+  },
+  {
+    label: 'Raleigh',
+    before: raleighBefore,
+    after: raleighAfter,
+    caption: 'Raleigh (Hargett St) — Google Maps imagery (2015 vs 2026)',
   },
 ];
 

@@ -330,6 +330,12 @@ export default function CityModal({
                       : "—",
                 },
                 {
+                  title: "Vacancy Rate",
+                  dataIndex: "vacancyRate",
+                  width: 130,
+                  render: (v) => (v != null ? `${v}%` : "—"),
+                },
+                {
                   title: "Actions",
                   key: "actions",
                   fixed: "right",

@@ -13,7 +13,10 @@ const Scatter = lazy(() =>
 
 const CITY_FETCH_LIMIT = 100;
 
-const SERIES = '#1f8051';
+// Light fill with a dark ring: overlapping cities stay distinguishable because
+// each outline still shows through the neighbour's translucent fill.
+const DOT_FILL   = '#7dd3a8';   // yimby-300
+const DOT_BORDER = '#175235';   // yimby-800
 
 interface Point {
   city:       string;
@@ -125,10 +128,11 @@ export default function PermitsPriceChart() {
         sizeField: 'population',
         style: {
           shape: 'point',
-          fill: SERIES,
-          fillOpacity: 1,
-          stroke: '#fff',
-          lineWidth: 2,
+          fill: DOT_FILL,
+          fillOpacity: 0.75,
+          stroke: DOT_BORDER,
+          strokeOpacity: 1,
+          lineWidth: 1.5,
         },
         labels: [
           {

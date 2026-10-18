@@ -206,6 +206,20 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
                           />
                         </Text>
                       </div>
+
+                      <div className="flex justify-between">
+                        <Text type="secondary">Vacancy Rate</Text>
+                        <Text>
+                          {rating.vacancyRate != null ? `${rating.vacancyRate}%` : "—"}
+                          {/* Not inverted: a higher vacancy rate means more slack in
+                              the market, which favours renters. */}
+                          <TrendIcon
+                            label="Vacancy rate"
+                            current={rating.vacancyRate}
+                            previous={prev?.vacancyRate}
+                          />
+                        </Text>
+                      </div>
                     </div>
                   </div>
                   );

@@ -202,6 +202,21 @@ export default function CityMetricsModal({
               step={1000}
             />
           </Form.Item>
+
+          <Form.Item
+            name="vacancyRate"
+            label="Vacancy Rate (%)"
+            tooltip="Rental vacancy rate for the year, as a percentage. 5.2 means 5.2%."
+          >
+            <InputNumber
+              className="w-full"
+              min={0}
+              max={100}
+              step={0.1}
+              precision={1}
+              addonAfter="%"
+            />
+          </Form.Item>
         </div>
       </Form>
     </Modal>
