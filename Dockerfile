@@ -2,6 +2,10 @@ FROM node:24 AS build
 
 WORKDIR /app
 
+# The image uses the npm bundled with Node; skip npm's "new version available"
+# check, which only adds noise to every build.
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+
 COPY package*.json ./
 
 RUN npm ci
