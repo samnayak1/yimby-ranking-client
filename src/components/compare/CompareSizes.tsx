@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { Button, InputNumber, Input, Select, Tooltip } from 'antd';
 import {
@@ -23,6 +23,7 @@ interface Preset {
   key:    string;
   label:  string;
   shapes: { name: string; population: number; outline: [number, number][] }[];
+  story?: ReactNode;
 }
 
 const R = 6378137;
@@ -32,6 +33,49 @@ const COLORS = ['#2da066', '#2563eb', '#d97706', '#db2777', '#7c3aed', '#0891b2'
 // Outlines are hand-traced approximations, good for comparing footprints,
 // not for surveying.
 const PRESETS: Preset[] = [
+  {
+    key:   'highfive-bkh',
+    label: 'High Five Interchange vs Brooklyn Heights + DUMBO',
+    story: (
+      <>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-yimby-600">
+          Same land, different choices
+        </p>
+        <p className="mt-2 text-xl sm:text-2xl font-bold tracking-tight text-gray-900 leading-snug">
+          One Dallas highway interchange takes up as much ground as two of
+          Brooklyn's most loved neighbourhoods.
+        </p>
+        <p className="mt-3 text-base text-gray-600 leading-relaxed">
+          The High Five, where I-635 meets US-75, covers roughly the same area
+          as Brooklyn Heights and DUMBO combined. In New York that land holds
+          around <strong className="text-gray-900">25,000 people</strong>, with
+          brownstones, shops, parks and a waterfront promenade. In Dallas it holds
+          five levels of ramps and a few hundred residents on its edges.
+        </p>
+      </>
+    ),
+    shapes: [
+      {
+        name:       'High Five Interchange, Dallas',
+        // The outline clips a few streets of single-family homes on its
+        // north-west and south-west edges — roughly 100 houses.
+        population: 250,
+        outline: [
+          [32.931, -96.765], [32.927, -96.756], [32.924, -96.755], [32.919, -96.760],
+          [32.918, -96.766], [32.924, -96.774], [32.929, -96.771],
+        ],
+      },
+      {
+        name:       'Brooklyn Heights + DUMBO',
+        population: 25_000,
+        outline: [
+          [40.7037, -73.9944], [40.7040, -73.9840], [40.7010, -73.9840],
+          [40.6990, -73.9880], [40.6930, -73.9900], [40.6906, -73.9935],
+          [40.6930, -74.0015], [40.7000, -73.9965],
+        ],
+      },
+    ],
+  },
   {
     key:   'bcn-la',
     label: 'Barcelona metro vs City of Los Angeles',
@@ -56,29 +100,6 @@ const PRESETS: Preset[] = [
           [33.74, -118.31], [33.88, -118.31], [33.92, -118.33], [33.94, -118.42],
           [33.96, -118.45], [33.99, -118.48], [34.04, -118.56], [34.10, -118.60],
           [34.20, -118.67], [34.27, -118.65], [34.30, -118.56],
-        ],
-      },
-    ],
-  },
-  {
-    key:   'highfive-bkh',
-    label: 'High Five Interchange vs Brooklyn Heights + DUMBO',
-    shapes: [
-      {
-        name:       'High Five Interchange, Dallas',
-        population: 0,
-        outline: [
-          [32.931, -96.765], [32.927, -96.756], [32.924, -96.755], [32.919, -96.760],
-          [32.918, -96.766], [32.924, -96.774], [32.929, -96.771],
-        ],
-      },
-      {
-        name:       'Brooklyn Heights + DUMBO',
-        population: 25_000,
-        outline: [
-          [40.7037, -73.9944], [40.7040, -73.9840], [40.7010, -73.9840],
-          [40.6990, -73.9880], [40.6930, -73.9900], [40.6906, -73.9935],
-          [40.6930, -74.0015], [40.7000, -73.9965],
         ],
       },
     ],
@@ -288,6 +309,8 @@ export default function CompareSizes() {
     setDrawing(false);
   };
 
+  const story = PRESETS.find(p => p.key === presetKey)?.story;
+
   const update = (id: string, patch: Partial<Shape>) =>
     setShapes(prev => prev.map(s => (s.id === id ? { ...s, ...patch } : s)));
 
@@ -332,6 +355,12 @@ export default function CompareSizes() {
         ref={containerRef}
         className="w-full h-80 sm:h-120 rounded-xl border border-yimby-100 shadow-sm overflow-hidden"
       />
+
+      {story && (
+        <div className="max-w-2xl border-l-4 border-yimby-500 pl-4 sm:pl-5 py-1">
+          {story}
+        </div>
+      )}
 
       <ul className="divide-y divide-gray-100 border border-gray-100 rounded-xl">
         {shapes.map(s => {
