@@ -144,28 +144,28 @@ export default function VacancyMyth() {
   });
 
   return (
-    <section aria-labelledby="vacancy-myth" className="mt-10 max-w-3xl">
+    <section aria-labelledby="vacancy-myth" className="mt-8 max-w-3xl">
       <h2 id="vacancy-myth" className="sr-only">Myth and fact: vacant homes</h2>
 
       <div>
-        <p className="text-4xl sm:text-5xl font-black tracking-tight leading-none text-red-700">Myth</p>
-        <p className="mt-3 text-lg sm:text-xl leading-relaxed text-gray-700">
+        <p className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-red-700">Myth</p>
+        <p className="mt-2 text-base sm:text-lg leading-relaxed text-gray-700">
           “America has 14&nbsp;million empty homes, so we don’t need to build more.”
         </p>
       </div>
 
-      <div className="mt-10">
-        <p className="text-4xl sm:text-5xl font-black tracking-tight leading-none text-yimby-700">Fact</p>
-        <p className="mt-3 text-lg sm:text-xl leading-relaxed text-gray-700">
+      <div className="mt-8">
+        <p className="text-3xl sm:text-4xl font-black tracking-tight leading-none text-yimby-700">Fact</p>
+        <p className="mt-2 text-base sm:text-lg leading-relaxed text-gray-700">
           Of the {(TOTAL_HOMES / 1_000_000).toFixed(1)}&nbsp;million homes in the US, about{' '}
           {(TOTAL_VACANT / 1_000_000).toFixed(1)}&nbsp;million were vacant in 2024. But “vacant”
           covers much more than empty homes waiting for a family:
         </p>
 
-        <div className="mt-6 flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
+        <div className="mt-5 flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-6">
           <svg
             viewBox="0 0 260 260"
-            className="w-56 shrink-0 sm:w-60"
+            className="w-48 shrink-0 sm:w-52"
             role="img"
             aria-label={CHART_SUMMARY}
           >
@@ -218,17 +218,17 @@ export default function VacancyMyth() {
             </text>
           </svg>
 
-          <ul className="w-full space-y-1.5">
+          <ul className="w-full space-y-1 text-sm">
             {SEGMENTS.map(s => (
               <li
                 key={s.key}
                 tabIndex={0}
-                className={`flex gap-3 rounded-lg px-3 py-2 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-yimby-300 ${
+                className={`flex gap-3 rounded-lg px-3 py-1.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-yimby-300 ${
                   active === s.key ? 'bg-gray-100' : ''
                 }`}
                 {...highlight(s.key)}
               >
-                <span className="mt-1.5 h-3 w-3 shrink-0 rounded-sm" style={{ background: s.color }} aria-hidden="true" />
+                <span className="mt-1 h-3 w-3 shrink-0 rounded-sm" style={{ background: s.color }} aria-hidden="true" />
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-baseline justify-between gap-x-3">
                     <span className="font-semibold text-gray-900">{s.label}</span>
@@ -237,14 +237,14 @@ export default function VacancyMyth() {
                       <span className="text-gray-500"> · {s.percent}%</span>
                     </span>
                   </span>
-                  <span className="block text-sm text-gray-500">{s.note}</span>
+                  <span className="block text-xs text-gray-500">{s.note}</span>
                 </span>
               </li>
             ))}
           </ul>
         </div>
 
-        <p className="mt-6 text-base leading-relaxed text-gray-700">
+        <p className="mt-5 text-sm sm:text-base leading-relaxed text-gray-700">
           There isn’t a hidden supply of 14&nbsp;million homes waiting for people. Most are
           vacation homes, homes between occupants, or homes that need work.
         </p>
