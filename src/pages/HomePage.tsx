@@ -6,6 +6,7 @@ import MediaTabs from '../components/media/MediaTabs';
 import type { AuthUser } from '../types';
 import Navbar from '../components/NavBar';
 import Footer from '../components/Footer';
+import VacancyMyth from '../components/VacancyMyth';
 import { useIsMobile } from '../hooks/useIsMobile';
 import StreetscapeBackdrop from '../components/StreetscapeBackdrop';
 
@@ -51,6 +52,8 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
             far below the pace needed to meet growing demand, pushing prices and
             rents to historic highs across the country.
           </p>
+
+          <VacancyMyth />
         </header>
 
 

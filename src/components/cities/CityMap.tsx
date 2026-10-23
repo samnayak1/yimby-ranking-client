@@ -7,6 +7,10 @@ interface Props {
   cities: CityMapPoint[];
 }
 
+// Contiguous US. Fitting to bounds rather than a fixed centre and zoom picks
+// whatever zoom fits the whole country into the container, phone or desktop.
+const US_BOUNDS = L.latLngBounds([24.4, -125.0], [49.4, -66.9]);
+
 function scoreColor(score?: number): string {
   if (!score) return '#9ca3af';
   if (score >= 8) return '#2da066';
@@ -47,13 +51,18 @@ export default function CityMap({ cities }: Props) {
     if (!containerRef.current || mapRef.current) return;
 
     mapRef.current = L.map(containerRef.current, { preferCanvas: true })
-      .setView([20, 0], 2);
+      .fitBounds(US_BOUNDS);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors',
     }).addTo(mapRef.current);
 
-    setTimeout(() => mapRef.current?.invalidateSize(), 100);
+    // The container may not have its final size on the first frame, which makes
+    // the first fit choose the wrong zoom. Re-fit once Leaflet knows the size.
+    setTimeout(() => {
+      mapRef.current?.invalidateSize();
+      mapRef.current?.fitBounds(US_BOUNDS);
+    }, 100);
 
     // The container height changes at the sm breakpoint and on rotation —
     // Leaflet needs to be told, or tiles render into the old box.
