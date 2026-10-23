@@ -1,7 +1,8 @@
 import { Tabs } from 'antd';
-import { TeamOutlined, GlobalOutlined, PictureOutlined } from '@ant-design/icons';
+import { TeamOutlined, GlobalOutlined, PictureOutlined, ColumnWidthOutlined } from '@ant-design/icons';
 import PoliticiansTable from '../components/politicians/PoliticiansTable';
 import CitiesView from '../components/cities/CitiesView';
+import CompareSizes from '../components/compare/CompareSizes';
 import MediaTabs from '../components/media/MediaTabs';
 import type { AuthUser } from '../types';
 import Navbar from '../components/NavBar';
@@ -93,6 +94,16 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
                   </span>
                 ),
                 children: <CitiesView isAdmin={isAdmin} />,
+              },
+              {
+                key:   'compare',
+                label: (
+                  <span className="flex items-center gap-2">
+                    <ColumnWidthOutlined />
+                    Compare sizes
+                  </span>
+                ),
+                children: <CompareSizes />,
               },
             ]}
           />
