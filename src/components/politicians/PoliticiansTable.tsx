@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Button, Dropdown, Popconfirm, message, Tag, Tooltip } from 'antd';
+import { Table, Button, Dropdown, Modal, message, Tag, Tooltip } from 'antd';
 import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { statusColors, statusLabels, type PoliticianStatus, type PoliticianFilters as Filters, type Politician } from '../../types';
@@ -170,18 +170,16 @@ export default function PoliticiansTable({ isAdmin }: Props) {
                 },
                 {
                   key: 'delete',
-                  label: (
-                    <Popconfirm
-                      title="Delete Politician"
-                      description={`Delete "${record.name}"? This cannot be undone.`}
-                      onConfirm={() => handleDelete(record.id)}
-                      okText="Delete"
-                      cancelText="Cancel"
-                      okButtonProps={{ danger: true }}
-                    >
-                      <span>Delete</span>
-                    </Popconfirm>
-                  ),
+                  label: 'Delete',
+                  // A Popconfirm inside the menu item unmounts as soon as the
+                  // dropdown closes on click, so confirm in a modal instead.
+                  onClick: () => Modal.confirm({
+                    title:         'Delete Politician',
+                    content:       `Delete "${record.name}"? This cannot be undone.`,
+                    okText:        'Delete',
+                    okButtonProps: { danger: true },
+                    onOk:          () => handleDelete(record.id),
+                  }),
                   icon: <DeleteOutlined className="text-red-500" />,
                   danger: true,
                 },

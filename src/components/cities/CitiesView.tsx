@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Table, Button, Dropdown, Popconfirm, message, Tooltip } from 'antd';
+import { Table, Button, Dropdown, Modal, message, Tooltip } from 'antd';
 import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { City, CityFilters as Filters } from '../../types';
@@ -155,18 +155,16 @@ export default function CitiesView({ isAdmin }: Props) {
                 },
                 {
                   key: 'delete',
-                  label: (
-                    <Popconfirm
-                      title="Delete City"
-                      description={`Delete "${record.name}"? This cannot be undone.`}
-                      onConfirm={() => handleDelete(record.id)}
-                      okText="Delete"
-                      cancelText="Cancel"
-                      okButtonProps={{ danger: true }}
-                    >
-                      <span>Delete</span>
-                    </Popconfirm>
-                  ),
+                  label: 'Delete',
+                  // A Popconfirm inside the menu item unmounts as soon as the
+                  // dropdown closes on click, so confirm in a modal instead.
+                  onClick: () => Modal.confirm({
+                    title:         'Delete City',
+                    content:       `Delete "${record.name}"? This cannot be undone.`,
+                    okText:        'Delete',
+                    okButtonProps: { danger: true },
+                    onOk:          () => handleDelete(record.id),
+                  }),
                   icon: <DeleteOutlined className="text-red-500" />,
                   danger: true,
                 },
