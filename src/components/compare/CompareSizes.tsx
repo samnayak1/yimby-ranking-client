@@ -22,7 +22,14 @@ interface Shape {
 interface Preset {
   key:    string;
   label:  string;
-  shapes: { name: string; population: number; outline: [number, number][] }[];
+  shapes: {
+    name:       string;
+    population: number;
+    outline:    [number, number][];
+    // Where to put this shape, as [east, north] metres from the first shape's
+    // centre. Without it, the shape is stacked on that centre.
+    offset?:    [number, number];
+  }[];
   story?: ReactNode;
 }
 
@@ -77,18 +84,9 @@ const PRESETS: Preset[] = [
     ],
   },
   {
-    key:   'bcn-la',
-    label: 'Barcelona metro vs City of Los Angeles',
+    key:   'la-bcn-manhattan',
+    label: 'Barcelona metro and Manhattan inside the City of Los Angeles',
     shapes: [
-      {
-        name:       'Barcelona metropolitan area (AMB)',
-        population: 3_300_000,
-        outline: [
-          [41.27, 1.95], [41.30, 2.05], [41.35, 2.14], [41.39, 2.20], [41.43, 2.24],
-          [41.47, 2.28], [41.50, 2.22], [41.53, 2.10], [41.50, 2.00], [41.45, 1.95],
-          [41.40, 1.90], [41.33, 1.88], [41.29, 1.92],
-        ],
-      },
       {
         name:       'City of Los Angeles',
         population: 3_800_000,
@@ -100,6 +98,37 @@ const PRESETS: Preset[] = [
           [33.74, -118.31], [33.88, -118.31], [33.92, -118.33], [33.94, -118.42],
           [33.96, -118.45], [33.99, -118.48], [34.04, -118.56], [34.10, -118.60],
           [34.20, -118.67], [34.27, -118.65], [34.30, -118.56],
+        ],
+      },
+      // Both offsets were found by search over this LA outline: Barcelona where
+      // the most of it lands inside LA (~98%, over the San Fernando Valley), and
+      // Manhattan fully inside central LA with the most clearance (~2.6 km) from
+      // both LA's edge and Barcelona. Re-run the search if either outline changes.
+      {
+        name:       'Barcelona metropolitan area (AMB)',
+        population: 3_300_000,
+        offset:     [-8000, 14000],
+        outline: [
+          [41.27, 1.95], [41.30, 2.05], [41.35, 2.14], [41.39, 2.20], [41.43, 2.24],
+          [41.47, 2.28], [41.50, 2.22], [41.53, 2.10], [41.50, 2.00], [41.45, 1.95],
+          [41.40, 1.90], [41.33, 1.88], [41.29, 1.92],
+        ],
+      },
+      {
+        name:       'Manhattan',
+        // 2020 Census: 1,694,251.
+        population: 1_690_000,
+        offset:     [8000, -3250],
+        // Clockwise from the Battery: up the Hudson, round Inwood, down the
+        // Harlem and East rivers. Traces to ~58 km² against a real 59 km².
+        outline: [
+          [40.7006, -74.0154], [40.7110, -74.0170], [40.7270, -74.0120], [40.7420, -74.0100],
+          [40.7570, -74.0050], [40.7720, -73.9940], [40.7890, -73.9820], [40.8050, -73.9700],
+          [40.8230, -73.9590], [40.8410, -73.9480], [40.8600, -73.9350], [40.8730, -73.9250],
+          [40.8780, -73.9200], [40.8740, -73.9056], [40.8660, -73.9146], [40.8500, -73.9266],
+          [40.8340, -73.9306], [40.8180, -73.9286], [40.8030, -73.9256], [40.7950, -73.9296],
+          [40.7800, -73.9386], [40.7640, -73.9516], [40.7480, -73.9646], [40.7330, -73.9686],
+          [40.7180, -73.9726], [40.7110, -73.9756], [40.7070, -73.9956], [40.7030, -74.0090],
         ],
       },
     ],
@@ -150,12 +179,17 @@ function makeShape(name: string, population: number | null, pts: L.LatLng[], ind
   };
 }
 
-// Every shape in a preset is stacked on the first one's centre, so the
-// comparison is visible straight away.
+// Every shape in a preset is laid over the first one, so the comparison is
+// visible straight away: at the first shape's centre, or at its own offset
+// from that centre when the preset gives one.
 function loadPreset(preset: Preset): Shape[] {
   const shapes = preset.shapes.map((s, i) =>
     makeShape(s.name, s.population, s.outline.map(([lat, lng]) => L.latLng(lat, lng)), i));
-  return shapes.map(s => ({ ...s, center: shapes[0].home }));
+  const base = shapes[0].home;
+  return shapes.map((s, i) => {
+    const offset = preset.shapes[i].offset;
+    return { ...s, center: offset ? fromOffsets([offset], base)[0] : base };
+  });
 }
 
 const fmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
@@ -317,8 +351,7 @@ export default function CompareSizes() {
   return (
     <div className="space-y-4">
       <p className="text-gray-600 max-w-2xl">
-        Places with similar populations can occupy wildly different amounts of
-        land. Drag any outline across the map to lay it over another place — it
+        Drag any outline across the map to lay it over another place and it
         keeps its true size wherever you move it. Draw your own outline to
         compare anywhere.
       </p>
