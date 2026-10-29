@@ -410,7 +410,7 @@ export default function CompareSizes() {
       <p className="text-gray-600 max-w-2xl">
         Drag any outline across the map to lay it over another place and it
         keeps its true size wherever you move it. Draw your own outline to
-        compare anywhere.
+        compare anywhere. Dragging a shape does not work on mobile devices.s
       </p>
 
       <div className="flex flex-wrap items-center gap-2">
