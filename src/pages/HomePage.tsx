@@ -1,8 +1,8 @@
-import { Tabs } from 'antd';
+import { lazy, Suspense } from 'react';
+import { Spin, Tabs } from 'antd';
 import { TeamOutlined, GlobalOutlined, PictureOutlined, ColumnWidthOutlined } from '@ant-design/icons';
 import PoliticiansTable from '../components/politicians/PoliticiansTable';
 import CitiesView from '../components/cities/CitiesView';
-import CompareSizes from '../components/compare/CompareSizes';
 import MediaTabs from '../components/media/MediaTabs';
 import type { AuthUser } from '../types';
 import Navbar from '../components/NavBar';
@@ -10,6 +10,9 @@ import Footer from '../components/Footer';
 import HousingMyths from '../components/myths/HousingMyths';
 import { useIsMobile } from '../hooks/useIsMobile';
 import StreetscapeBackdrop from '../components/StreetscapeBackdrop';
+
+// The compare tab carries a lot of outline data, so it loads when opened.
+const CompareSizes = lazy(() => import('../components/compare/CompareSizes'));
 
 interface Props {
   user:     AuthUser | null;
@@ -103,7 +106,11 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
                     Compare outlines
                   </span>
                 ),
-                children: <CompareSizes />,
+                children: (
+                  <Suspense fallback={<div className="flex justify-center py-20"><Spin /></div>}>
+                    <CompareSizes />
+                  </Suspense>
+                ),
               },
             ]}
           />
