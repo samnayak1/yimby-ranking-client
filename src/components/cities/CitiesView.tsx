@@ -4,7 +4,7 @@ import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-d
 import type { ColumnsType } from 'antd/es/table';
 import type { City, CityFilters as Filters } from '../../types';
 import { useCities, useCityMapData, useDeleteCity } from '../../hooks/cities.hook';
-import ScoreBadge from '../ScoreBadge';
+import { formatPermits, latestPermitsPer1000 } from '../../utils/cityMetrics.utils';
 import CityMap from './CityMap';
 import CityFilters from './CityFilters';
 import CityModal from './CityModal';
@@ -20,13 +20,16 @@ const SORT_MAP = {
   name: "name",
   geography: "countryCode",
   price: "medianHousePrice",
-  rating: "rating",
+  permits: "permitsPer1000Residents",
 } as const;
+
+// Most permits per resident first, until a visitor picks another sort.
+const DEFAULT_SORT = { sortBy: "permitsPer1000Residents", sortOrder: "desc" } as const;
 
 export default function CitiesView({ isAdmin }: Props) {
   const isMobile = useIsMobile();
   const isNarrow = useIsNarrow();
-  const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20 });
+  const [filters, setFilters] = useState<Filters>({ page: 1, limit: 20, ...DEFAULT_SORT });
   const [modalVisible, setModalVisible] = useState(false);
   const [editingCity, setEditingCity] = useState<City | null>(null);
   const [detailVisible, setDetailVisible] = useState(false);
@@ -59,9 +62,13 @@ export default function CitiesView({ isAdmin }: Props) {
       }).format(r.medianHousePrice)
       : null;
 
+  // The table's sort arrows follow the filters, so the default sort shows too.
+  const sortOrderFor = (by: NonNullable<Filters['sortBy']>) =>
+    filters.sortBy === by ? (filters.sortOrder === 'desc' ? 'descend' as const : 'ascend' as const) : null;
+
   const columns: ColumnsType<City> = [
-    // Below `sm` the table can't fit six columns without pushing the score
-    // off-screen, so identity + geography + price collapse into one cell.
+    // Below `sm` the table can't fit six columns without pushing the permits
+    // figure off-screen, so identity + geography + price collapse into one cell.
     {
       title: 'City',
       key: 'summary',
@@ -84,6 +91,7 @@ export default function CitiesView({ isAdmin }: Props) {
       dataIndex: 'name',
       key: 'name',
       sorter: true,
+      sortOrder: sortOrderFor('name'),
       responsive: ['sm'],
       render: name => <span className="font-semibold text-gray-800">{name}</span>,
     },
@@ -102,6 +110,7 @@ export default function CitiesView({ isAdmin }: Props) {
       title: 'Median Price',
       key: 'price',
       sorter: true,
+      sortOrder: sortOrderFor('medianHousePrice'),
       responsive: ['sm'],
       render: (_, r) => formatPrice(r) ?? <span className="text-gray-400">—</span>,
     },
@@ -112,11 +121,20 @@ export default function CitiesView({ isAdmin }: Props) {
       render: (_, r) => r.currency ?? <span className="text-gray-400">—</span>,
     },
     {
-      title: 'Score',
-      key: 'rating',
-      dataIndex: 'rating',
+      title: 'Permits / 1,000 residents',
+      key: 'permits',
       sorter: true,
-      render: (_, r) => <ScoreBadge rating={r.rating??0} />,
+      sortOrder: sortOrderFor('permitsPer1000Residents'),
+      sortDirections: ['descend', 'ascend'],
+      render: (_, r) => {
+        const p = latestPermitsPer1000(r);
+        return p ? (
+          <span className="whitespace-nowrap">
+            <span className="text-xl font-bold tabular-nums text-yimby-800">{formatPermits(p.value)}</span>
+            <span className="ml-1.5 text-xs text-gray-400">{p.year}</span>
+          </span>
+        ) : <span className="text-gray-400">—</span>;
+      },
     },
     {
       title: 'Notes',
@@ -209,20 +227,18 @@ export default function CitiesView({ isAdmin }: Props) {
             loading={isLoading}
             onChange={(pagination, _tableFilters, sorter) => {
               const s = Array.isArray(sorter) ? sorter[0] : sorter;
-              const sortBy =
-                SORT_MAP[(s?.columnKey as keyof typeof SORT_MAP) ?? "name"] ?? "name";
+              const sort = s?.order
+                ? {
+                    sortBy: SORT_MAP[s.columnKey as keyof typeof SORT_MAP] ?? "name",
+                    sortOrder: s.order === "descend" ? "desc" as const : "asc" as const,
+                  }
+                : DEFAULT_SORT;
 
               setFilters({
                 ...filters,
                 page: pagination.current ?? 1,
                 limit: pagination.pageSize ?? 20,
-                sortBy,
-                sortOrder:
-                  s?.order === "descend"
-                    ? "desc"
-                    : s?.order === "ascend"
-                      ? "asc"
-                      : "asc",
+                ...sort,
               });
             }}
 

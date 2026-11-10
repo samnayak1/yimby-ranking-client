@@ -59,7 +59,6 @@ export default function CityModal({
         lng: editingCity.lng,
         medianHousePrice: editingCity.medianHousePrice,
         currency: editingCity.currency,
-          rating: editingCity.rating,
         notes: editingCity.notes,
       });
     } else if (visible) {
@@ -221,27 +220,6 @@ export default function CityModal({
             </Form.Item>
           </div>
           <Form.Item
-  name="rating"
-  label="Current Rating"
-  rules={[
-    {
-      type: "number",
-      min: 1,
-      max: 10,
-      message: "Rating must be between 1 and 10",
-    },
-  ]}
->
-  <InputNumber
-    className="w-full"
-    min={1}
-    max={10}
-    step={0.1}
-    precision={1}
-  />
-</Form.Item>
-
-          <Form.Item
             name="notes"
             label="Notes"
           >
@@ -270,14 +248,6 @@ export default function CityModal({
                   width: 80,
                   sorter: (a, b) => b.year - a.year,
                   defaultSortOrder: "descend",
-                },
-                {
-                  title: "Score",
-                  dataIndex: "rating",
-                  width: 110,
-                  render: (value) => (
-                    <strong>{value}/10</strong>
-                  ),
                 },
                 {
                   title: "Permits",

@@ -1,12 +1,12 @@
 import { Modal, Descriptions, Tag, Space, Typography, Divider } from 'antd';
 import { CalendarOutlined, EnvironmentOutlined, DollarOutlined, GlobalOutlined } from '@ant-design/icons';
-import ScoreBadge from '../ScoreBadge';
 import Paragraph from 'antd/es/typography/Paragraph';
 import type { City } from '../../types';
 import { getCountryName } from '../../utils/countries.utils';
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { responsiveModalProps } from '../../utils/responsive.utils';
 import TrendIcon from '../TrendIcon';
+import { formatPermits, latestPermitsPer1000 } from '../../utils/cityMetrics.utils';
 
 const { Text } = Typography;
 
@@ -20,6 +20,8 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
   const isMobile = useIsMobile();
 
   if (!city) return null;
+
+  const permits = latestPermitsPer1000(city);
 
   const formatPrice = (price: number, currency: string) => {
     if (price == null) return '—';
@@ -81,8 +83,13 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
             </Space>
           </Descriptions.Item>
 
-          <Descriptions.Item label="YIMBY Score" span={2}>
-            <ScoreBadge rating={city.rating??0} />
+          <Descriptions.Item label="Permits / 1,000 residents" span={2}>
+            {permits ? (
+              <span>
+                <Text strong className="text-2xl tabular-nums text-yimby-800">{formatPermits(permits.value)}</Text>
+                <Text type="secondary" className="ml-2">in {permits.year}</Text>
+              </span>
+            ) : '—'}
           </Descriptions.Item>
 
           {city.notes && (
@@ -101,7 +108,7 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
             <Divider orientation="horizontal" className="text-sm">
               <Space>
                 <CalendarOutlined />
-                Rating History
+                Yearly figures
               </Space>
             </Divider>
             <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
@@ -118,19 +125,16 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
                         {rating.year}
                       </Text>
 
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full"
-                          style={{
-                            backgroundColor:
-                              rating.rating >= 8
-                                ? "#22c55e"
-                                : rating.rating >= 5
-                                  ? "#eab308"
-                                  : "#ef4444",
-                          }}
+                      <div className="flex items-baseline gap-1.5">
+                        <Text strong className="text-lg tabular-nums text-yimby-800">
+                          {rating.permitsPer1000Residents != null ? formatPermits(rating.permitsPer1000Residents) : "—"}
+                        </Text>
+                        <Text type="secondary" className="text-xs">permits / 1,000</Text>
+                        <TrendIcon
+                          label="Permits per 1,000 residents"
+                          current={rating.permitsPer1000Residents}
+                          previous={prev?.permitsPer1000Residents}
                         />
-                        <Text strong>{rating.rating}/10</Text>
                       </div>
                     </div>
 
@@ -144,13 +148,6 @@ export default function CityDetailModal({ visible, onClose, city }: CityDetailMo
                             current={rating.permitsIssued}
                             previous={prev?.permitsIssued}
                           />
-                        </Text>
-                      </div>
-
-                      <div className="flex justify-between">
-                        <Text type="secondary">Permits / 1k</Text>
-                        <Text>
-                          {rating.permitsPer1000Residents?.toFixed(2) ?? "—"}
                         </Text>
                       </div>
 

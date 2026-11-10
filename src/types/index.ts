@@ -1,11 +1,14 @@
-export interface Rating {
-  year:    number;
-  rating: number;
+// Set by hand in the admin UI, most pro-housing first.
+export const COLOR_CODES = ['DARK_GREEN', 'GREEN', 'LIGHT_RED', 'DARK_RED'] as const;
+export type ColorCode = (typeof COLOR_CODES)[number];
+
+export interface PoliticianItem {
+  text: string;
+  url:  string | null;
 }
 
 export interface CityRating {
   year: number;
-  rating: number;
   permitsIssued?: number;
   permitsPer1000Residents?: number;
   housingStarts?: number;
@@ -19,7 +22,6 @@ export interface CityRating {
 export interface UpsertCityRatingBody {
   year: number;
 
-  rating?: number;
   permitsIssued?: number;
   permitsPer1000Residents?: number;
   housingStarts?: number;
@@ -40,7 +42,10 @@ export interface UpsertPoliticianBody {
   nationalityCode: string;
   politicalLeaning?: string | null;
   notes?: string | null;
-
+  colorCode?: ColorCode | null;
+  quotes?: PoliticianItem[];
+  good?: PoliticianItem[];
+  bad?: PoliticianItem[];
 }
 export interface UpsertPoliticianInput extends UpsertPoliticianBody {
   id: number;
@@ -72,9 +77,11 @@ export interface Politician {
   status:      PoliticianStatus;
   nationalityCode:     string | null;
   politicalLeaning: string | null;
-   rating:             number|null;
+  colorCode:       ColorCode | null;
   notes:           string | null;
-  ratings:        Rating[];
+  quotes:          PoliticianItem[];
+  good:            PoliticianItem[];
+  bad:             PoliticianItem[];
 }
 
 export interface City {
@@ -84,7 +91,6 @@ export interface City {
   region:           string | null;
   medianHousePrice: number | null;
   currency:         string | null;
-  rating:             number|null;
   notes:            string | null;
   lat:              number | null;
   lng:              number | null;
@@ -120,14 +126,12 @@ export interface CityFilters extends PaginationParams {
   region?: string;
   minPrice?: number;
   maxPrice?: number;
-  minScore?: number;
-  maxScore?: number;
   sortBy?:
     | "name"
     | "countryCode"
     | "region"
     | "medianHousePrice"
-    | "rating";
+    | "permitsPer1000Residents";
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -138,8 +142,6 @@ export interface PoliticianFilters extends PaginationParams {
   politicalLeaning?: string;
   nationalityCode?: string;
   status?: PoliticianStatus;
-  minScore?: number;
-  maxScore?: number;
   cityId?: number;
 
   sortBy?:
@@ -147,7 +149,7 @@ export interface PoliticianFilters extends PaginationParams {
     | "designation"
     | "politicalLeaning"
     | "nationalityCode"
-    | "rating";
+    | "colorCode";
 
   sortOrder?: "asc" | "desc";
 }
@@ -177,7 +179,8 @@ export type CityMapPoint = {
   region:           string | null;
   lat:              number;
   lng:              number;
-  rating:           number | null;
+  // Latest year's figure.
+  permitsPer1000Residents: number | null;
   medianHousePrice: number | null;
   currency:         string | null;
   notes:            string | null;

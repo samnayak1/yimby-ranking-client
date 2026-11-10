@@ -19,7 +19,6 @@ interface UpdateCityInput {
   medianHousePrice?: number;
   currency?: string;
   notes?: string;
-  rating?: number;
   lat?: number;
   lng?: number;
 }

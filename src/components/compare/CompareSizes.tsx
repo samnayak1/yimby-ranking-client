@@ -123,57 +123,7 @@ const PRESETS: Preset[] = [
         ]]],
       },
     ],
-  },
-  {
-    key:   'la-bcn-manhattan',
-    label: 'Barcelona metro and Manhattan inside the City of Los Angeles',
-    shapes: [
-      {
-        name:       'City of Los Angeles',
-        population: 3_800_000,
-        outline: [[[
-          [34.33, -118.50], [34.30, -118.40], [34.28, -118.28], [34.23, -118.23],
-          [34.17, -118.36], [34.14, -118.36], [34.14, -118.27], [34.15, -118.20],
-          [34.12, -118.18], [34.08, -118.16], [34.03, -118.19], [34.00, -118.24],
-          [33.93, -118.24], [33.87, -118.29], [33.72, -118.29], [33.71, -118.31],
-          [33.74, -118.31], [33.88, -118.31], [33.92, -118.33], [33.94, -118.42],
-          [33.96, -118.45], [33.99, -118.48], [34.04, -118.56], [34.10, -118.60],
-          [34.20, -118.67], [34.27, -118.65], [34.30, -118.56],
-        ]]],
-      },
-      // Both offsets were found by search over this LA outline: Barcelona where
-      // the most of it lands inside LA (~98%, over the San Fernando Valley), and
-      // Manhattan fully inside central LA with the most clearance (~2.6 km) from
-      // both LA's edge and Barcelona. Re-run the search if either outline changes.
-      {
-        name:       'Barcelona metropolitan area (AMB)',
-        population: 3_300_000,
-        offset:     [-8000, 14000],
-        outline: [[[
-          [41.27, 1.95], [41.30, 2.05], [41.35, 2.14], [41.39, 2.20], [41.43, 2.24],
-          [41.47, 2.28], [41.50, 2.22], [41.53, 2.10], [41.50, 2.00], [41.45, 1.95],
-          [41.40, 1.90], [41.33, 1.88], [41.29, 1.92],
-        ]]],
-      },
-      {
-        name:       'Manhattan',
-        // 2020 Census: 1,694,251.
-        population: 1_690_000,
-        offset:     [8000, -3250],
-        // Clockwise from the Battery: up the Hudson, round Inwood, down the
-        // Harlem and East rivers. Traces to ~58 km² against a real 59 km².
-        outline: [[[
-          [40.7006, -74.0154], [40.7110, -74.0170], [40.7270, -74.0120], [40.7420, -74.0100],
-          [40.7570, -74.0050], [40.7720, -73.9940], [40.7890, -73.9820], [40.8050, -73.9700],
-          [40.8230, -73.9590], [40.8410, -73.9480], [40.8600, -73.9350], [40.8730, -73.9250],
-          [40.8780, -73.9200], [40.8740, -73.9056], [40.8660, -73.9146], [40.8500, -73.9266],
-          [40.8340, -73.9306], [40.8180, -73.9286], [40.8030, -73.9256], [40.7950, -73.9296],
-          [40.7800, -73.9386], [40.7640, -73.9516], [40.7480, -73.9646], [40.7330, -73.9686],
-          [40.7180, -73.9726], [40.7110, -73.9756], [40.7070, -73.9956], [40.7030, -74.0090],
-        ]]],
-      },
-    ],
-  },
+  }
 ];
 
 const mapParts = <A, B>(parts: Parts<A>, f: (p: A) => B): Parts<B> =>
@@ -410,7 +360,7 @@ export default function CompareSizes() {
       <p className="text-gray-600 max-w-2xl">
         Drag any outline across the map to lay it over another place and it
         keeps its true size wherever you move it. Draw your own outline to
-        compare anywhere. Dragging a shape does not work on mobile devices.s
+        compare anywhere. Dragging a shape does not work on mobile devices.
       </p>
 
       <div className="flex flex-wrap items-center gap-2">

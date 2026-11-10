@@ -33,15 +33,6 @@ export const FALLBACK_FILTER_OPTIONS = {
   },
 };
 
-export const SCORE_RANGES = [
-  { key: 'all',     label: 'All Scores',         value: undefined },
-  { key: '9-10',    label: '9–10 (Excellent)',    value: { min: 9,  max: 10 } },
-  { key: '7-8',     label: '7–8 (Good)',          value: { min: 7,  max: 8  } },
-  { key: '5-6',     label: '5–6 (Average)',       value: { min: 5,  max: 6  } },
-  { key: '3-4',     label: '3–4 (Below Average)', value: { min: 3,  max: 4  } },
-  { key: '0-2',     label: '0–2 (Poor)',          value: { min: 0,  max: 2  } },
-];
-
 export const PRICE_RANGES = [
   { key: 'any',    label: 'Any Price',       value: undefined },
   { key: '<200k',  label: 'Under $200k',     value: { min: 0,       max: 200000   } },

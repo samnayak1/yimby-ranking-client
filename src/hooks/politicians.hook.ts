@@ -72,29 +72,3 @@ export function useDeletePolitician() {
     },
   });
 }
-
-export interface UpsertPoliticianRatingInput {
-  id: number;
-  year: number;
-  rating: number;
-}
-
-export function useUpsertPoliticianRating() {
-  const qc = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, ...body }: UpsertPoliticianRatingInput) =>
-      politiciansApi.upsertRatings(id, body),
-
-    onSuccess: (data, variables) => {
-      qc.invalidateQueries({
-        queryKey: politicianKeys.lists(),
-      });
-
-      qc.setQueryData(
-        politicianKeys.detail(variables.id),
-        data,
-      );
-    },
-  });
-}

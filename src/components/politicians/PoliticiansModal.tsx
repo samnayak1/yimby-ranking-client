@@ -1,13 +1,12 @@
 import { useEffect } from 'react';
-import { Modal, Form, Input, Select, message, Tag, InputNumber } from 'antd';
+import { Modal, Form, Input, Select, message, Radio, Button, Divider } from 'antd';
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useCreatePolitician, useUpdatePolitician } from '../../hooks/politicians.hook';
 import { countryOptions } from '../../utils/countries.utils';
-import { Divider, Table, Button } from "antd";
-import { useState } from "react";
-import { PoliticianStatus, type Politician, type Rating } from "../../types";
-import PoliticianMetricsModal from './PoliticiantMetricsModal';
+import { PoliticianStatus, type Politician, type PoliticianItem } from "../../types";
 import { useIsMobile } from '../../hooks/useIsMobile';
 import { responsiveModalProps } from '../../utils/responsive.utils';
+import { COLOR_META, COLOR_ORDER } from './colorCodes';
 
 
 interface Props {
@@ -30,17 +29,35 @@ const LEANINGS = [
   'Libertarian', 'Nationalist', 'Green', 'Independent',
 ];
 
+const LISTS = [
+  { name: 'quotes', label: 'Quotes',   placeholder: 'What they said',            add: 'Add quote' },
+  { name: 'good',   label: 'The good', placeholder: 'e.g. Passed transit upzoning', add: 'Add good' },
+  { name: 'bad',    label: 'The bad',  placeholder: 'e.g. Blocked a 300-home project', add: 'Add bad' },
+] as const;
+
+// Same rule as the backend: a link has to be a full http(s) address, since
+// it's shown to every visitor as a clickable link.
+const isHttpUrl = (v: string) => {
+  try {
+    const u = new URL(v);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+// Drop rows left empty, and send a blank link as no link.
+const cleanList = (items: Partial<PoliticianItem>[] | undefined): PoliticianItem[] =>
+  (items ?? [])
+    .filter(i => i?.text?.trim())
+    .map(i => ({ text: i.text!.trim(), url: i.url?.trim() || null }));
+
 export default function PoliticianModal({ visible, onClose, editingPolitician }: Props) {
   const isMobile = useIsMobile();
   const [form] = Form.useForm();
   const createMutation = useCreatePolitician();
   const updateMutation = useUpdatePolitician();
   const isEditing = !!editingPolitician;
-
-  const [ratingsModalOpen, setRatingsModalOpen] = useState(false);
-
-  const [editingRating, setEditingRating] =
-    useState<Rating | undefined>();
 
   useEffect(() => {
     if (visible && editingPolitician) {
@@ -51,8 +68,11 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
         nationalityCode: editingPolitician.nationalityCode,
 
         status: editingPolitician.status,
-        rating: editingPolitician.rating,
+        colorCode: editingPolitician.colorCode,
         notes: editingPolitician.notes,
+        quotes: editingPolitician.quotes,
+        good: editingPolitician.good,
+        bad: editingPolitician.bad,
       });
     } else if (visible) {
       form.resetFields();
@@ -64,7 +84,11 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
       const values = await form.validateFields();
 
       const payload = {
-        ...values
+        ...values,
+        colorCode: values.colorCode ?? null,
+        quotes: cleanList(values.quotes),
+        good: cleanList(values.good),
+        bad: cleanList(values.bad),
       };
 
       if (isEditing) {
@@ -93,13 +117,13 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
       onCancel={onClose}
       onOk={handleSubmit}
       confirmLoading={createMutation.isPending || updateMutation.isPending}
-      {...responsiveModalProps(isMobile, 600)}
+      {...responsiveModalProps(isMobile, 640)}
       destroyOnHidden
     >
       <Form
         form={form}
         layout="vertical"
-        initialValues={{ status: PoliticianStatus.INOFFICE }}
+        initialValues={{ status: PoliticianStatus.INOFFICE, quotes: [], good: [], bad: [] }}
       >
         <Form.Item name="name" label="Name" rules={[{ required: true, message: 'Name is required' }]}>
           <Input placeholder="Enter politician name" />
@@ -121,24 +145,18 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
           </Select>
         </Form.Item>
 
-        <Form.Item
-          name="rating"
-          label="Current Rating"
-          rules={[
-            {
-              required: true,
-              message: "Please enter a rating",
-            },
-          ]}
-        >
-          <InputNumber
-            min={1}
-            max={10}
-            step={0.1}
-            precision={1}
-            className="w-full"
-            placeholder="1.0 - 10.0"
-          />
+        <Form.Item name="colorCode" label="Colour">
+          <Radio.Group className="flex flex-wrap gap-2">
+            {COLOR_ORDER.map(code => (
+              <Radio.Button key={code} value={code} className="!rounded-md">
+                <span className="flex items-center gap-1.5">
+                  <span className="h-3 w-3 rounded-sm" style={{ background: COLOR_META[code].swatch }} aria-hidden="true" />
+                  {COLOR_META[code].name}
+                </span>
+              </Radio.Button>
+            ))}
+            <Radio.Button value={null} className="!rounded-md">None</Radio.Button>
+          </Radio.Group>
         </Form.Item>
 
         <Form.Item
@@ -173,90 +191,50 @@ export default function PoliticianModal({ visible, onClose, editingPolitician }:
         </Form.Item>
 
         <Form.Item name="notes" label="Notes">
-          <Input.TextArea rows={4} maxLength={1000} showCount placeholder="Additional notes about this politician." />
+          <Input.TextArea rows={3} maxLength={1000} showCount placeholder="Additional notes about this politician." />
         </Form.Item>
-      </Form>
 
-
-
-      {isEditing && (
-        <>
-          <Divider>Yearly Ratings</Divider>
-
-          <Table
-            size="small"
-            rowKey="year"
-            pagination={false}
-            scroll={{ x: 'max-content' }}
-            dataSource={editingPolitician?.ratings ?? []}
-            columns={[
-              {
-                title: "Year",
-                dataIndex: "year",
-                sorter: (a, b) => b.year - a.year,
-                defaultSortOrder: "descend",
-                width: 120,
-              },
-              {
-                title: "Rating",
-                dataIndex: "rating",
-                width: 120,
-                render: (rating: number) => (
-                  <Tag
-                    color={
-                      rating >= 8
-                        ? "success"
-                        : rating <= 4
-                          ? "error"
-                          : "warning"
-                    }
-                  >
-                    <span className="text-lg font-bold">{rating}</span>
-                    <span className="text-[10px] ml-0.5 opacity-70">
-                      /10
-                    </span>
-                  </Tag>
-                ),
-              },
-              {
-                title: "",
-                width: 100,
-                render: (_, record) => (
-                  <Button
-                    size="small"
-                    onClick={() => {
-                      setEditingRating(record);
-                      setRatingsModalOpen(true);
-                    }}
-                  >
-                    Edit
+        {LISTS.map(list => (
+          <div key={list.name}>
+            <Divider titlePlacement="start" className="!text-sm">{list.label}</Divider>
+            <Form.List name={list.name}>
+              {(fields, { add, remove }) => (
+                <div className="space-y-3">
+                  {fields.map(field => (
+                    <div key={field.key} className="flex items-start gap-2">
+                      <div className="min-w-0 flex-1 space-y-1.5">
+                        <Form.Item
+                          name={[field.name, 'text']}
+                          className="!mb-0"
+                          rules={[{ required: true, whitespace: true, message: 'Enter the text, or remove this row' }]}
+                        >
+                          <Input.TextArea autoSize={{ minRows: 1, maxRows: 4 }} maxLength={2000} placeholder={list.placeholder} />
+                        </Form.Item>
+                        <Form.Item
+                          name={[field.name, 'url']}
+                          className="!mb-0"
+                          rules={[{
+                            validator: (_, v) =>
+                              !v?.trim() || isHttpUrl(v.trim())
+                                ? Promise.resolve()
+                                : Promise.reject(new Error('Must be a full http(s) link, e.g. https://example.com')),
+                          }]}
+                        >
+                          <Input size="small" placeholder="Source link (optional)" />
+                        </Form.Item>
+                      </div>
+                      <Button type="text" danger icon={<DeleteOutlined />} onClick={() => remove(field.name)} aria-label="Remove" />
+                    </div>
+                  ))}
+                  <Button type="dashed" block icon={<PlusOutlined />} onClick={() => add({ text: '', url: '' })}>
+                    {list.add}
                   </Button>
-                ),
-              },
-            ]}
-          />
-
-          <div className="flex justify-end mt-4">
-            <Button
-              type="primary"
-              className="w-full sm:w-auto"
-              onClick={() => {
-                setEditingRating(undefined);
-                setRatingsModalOpen(true);
-              }}
-            >
-              Add Year
-            </Button>
+                </div>
+              )}
+            </Form.List>
           </div>
-        </>
-      )}
-
-      <PoliticianMetricsModal
-        open={ratingsModalOpen}
-        politicianId={editingPolitician?.id}
-        rating={editingRating}
-        onClose={() => setRatingsModalOpen(false)}
-      />
+        ))}
+      </Form>
     </Modal>
   );
 }

@@ -107,23 +107,6 @@ export default function CityMetricsModal({
             />
           </Form.Item>
 
-          <Form.Item
-            name="rating"
-            label="Rating(out of 10)"
-            rules={[
-              {
-                required: true,
-                message: 'Score is required',
-              },
-            ]}
-          >
-            <InputNumber
-              className="w-full"
-              min={1}
-              max={10}
-              step={0.1}
-            />
-          </Form.Item>
 
         
         </div>

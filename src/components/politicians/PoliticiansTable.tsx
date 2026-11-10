@@ -4,7 +4,7 @@ import { PlusOutlined, MoreOutlined, EditOutlined, DeleteOutlined } from '@ant-d
 import type { ColumnsType } from 'antd/es/table';
 import { statusColors, statusLabels, type PoliticianStatus, type PoliticianFilters as Filters, type Politician } from '../../types';
 import { useDeletePolitician, usePoliticians } from '../../hooks/politicians.hook';
-import ScoreBadge from '../ScoreBadge';
+import { COLOR_META, COLOR_ORDER } from './colorCodes';
 import PoliticianFilters from './PoliticianFilters';
 import PoliticianModal from './PoliticiansModal';
 import PoliticianDetails from './PoliticianDetails';
@@ -31,7 +31,6 @@ const SORT_MAP = {
   designation: "designation",
   politicalLeaning: "politicalLeaning",
   nationality: "nationalityCode",
-  rating: "rating",
 } as const;
 
 export default function PoliticiansTable({ isAdmin }: Props) {
@@ -68,9 +67,9 @@ export default function PoliticiansTable({ isAdmin }: Props) {
       : <Tag>{status}</Tag>;
 
   const columns: ColumnsType<Politician> = [
-    // Phones can't fit seven columns, and a horizontally-scrolled table hides
-    // the rating. Below `sm` we collapse identity into one stacked cell so
-    // name, role and status stay visible next to the score.
+    // Phones can't fit seven columns. Below `sm` we collapse identity into one
+    // stacked cell so name, role and status stay visible; the row tint carries
+    // the colour.
     {
       title: "Politician",
       key: "summary",
@@ -133,12 +132,6 @@ export default function PoliticiansTable({ isAdmin }: Props) {
         ),
     },
     {
-      title: 'Rating',
-      key: 'rating',
-      dataIndex: 'rating',
-      sorter: true,
-      render: (_, r) => <ScoreBadge rating={r.rating ?? 0} />,
-    }, {
       title: 'Notes',
       key: 'notes',
       responsive: ['lg'],
@@ -213,6 +206,15 @@ export default function PoliticiansTable({ isAdmin }: Props) {
       {/* Filters are server-side — no onFilter on columns */}
       <PoliticianFilters filters={filters} onFilterChange={setFilters} />
 
+      <ul className="mb-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-gray-600" aria-label="Row colours">
+        {COLOR_ORDER.map(code => (
+          <li key={code} className="flex items-center gap-1.5">
+            <span className="h-3 w-3 rounded-sm" style={{ background: COLOR_META[code].swatch }} aria-hidden="true" />
+            {COLOR_META[code].meaning}
+          </li>
+        ))}
+      </ul>
+
       <Table
         columns={columns}
         dataSource={politicians}
@@ -246,7 +248,9 @@ export default function PoliticiansTable({ isAdmin }: Props) {
           showTotal: isMobile ? undefined : total => `${total} politicians`,
         }}
         className="rounded-xl overflow-hidden shadow-sm"
-        rowClassName="hover:bg-yimby-50 transition-colors cursor-pointer"
+        rowClassName={r =>
+          `transition-colors cursor-pointer ${r.colorCode ? COLOR_META[r.colorCode].row : 'hover:bg-yimby-50'}`
+        }
         size={isMobile ? 'small' : 'middle'}
         onRow={record => ({
           onClick: () => handleRowClick(record),

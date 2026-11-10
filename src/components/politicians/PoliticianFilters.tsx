@@ -3,7 +3,7 @@ import { Input, Select, Button, Row, Col } from 'antd';
 import { SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import { usePoliticianFilterOptions } from '../../hooks/politicians.hook';
 import { useDebounce } from '../../hooks/useDebounce';
-import { FALLBACK_FILTER_OPTIONS, SCORE_RANGES } from '../../types/fallbackFilterOptions';
+import { FALLBACK_FILTER_OPTIONS } from '../../types/fallbackFilterOptions';
 import type { PoliticianFilters } from '../../types';
 import { countryOptions } from '../../utils/countries.utils';
 
@@ -35,28 +35,10 @@ export default function PoliticianFiltersComponent({ filters, onFilterChange }: 
     [filters, onFilterChange]
   );
 
-  const handleScoreRangeChange = useCallback(
-    (value: string) => {
-      const range = SCORE_RANGES.find(r => r.key === value);
-      onFilterChange({
-        ...filters,
-        minScore: range?.value?.min,
-        maxScore: range?.value?.max,
-        page: 1,
-      });
-    },
-    [filters, onFilterChange]
-  );
-
   const handleClear = useCallback(() => {
     setSearchTerm('');
     onFilterChange({ page: 1, limit: filters.limit || 20 });
   }, [filters.limit, onFilterChange]);
-
-  const getSelectedScoreKey = () =>
-    SCORE_RANGES.find(
-      r => r.value?.min === filters.minScore && r.value?.max === filters.maxScore
-    )?.key;
 
   return (
     <div className="bg-gray-50 p-3 sm:p-4 rounded-lg mb-4">
@@ -119,19 +101,6 @@ export default function PoliticianFiltersComponent({ filters, onFilterChange }: 
           />
         </Col>
 
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Select
-            placeholder="Score Range"
-            value={getSelectedScoreKey()}
-            onChange={handleScoreRangeChange}
-            allowClear
-            className="w-full"
-          >
-            {SCORE_RANGES.map(r => (
-              <Option key={r.key} value={r.key}>{r.label}</Option>
-            ))}
-          </Select>
-        </Col>
 
         <Col xs={24} sm={12} md={8} lg={6}>
           <Select

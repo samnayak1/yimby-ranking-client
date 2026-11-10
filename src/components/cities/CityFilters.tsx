@@ -3,7 +3,7 @@ import { Input, Select, Button, Row, Col } from 'antd';
 import { SearchOutlined, ClearOutlined } from '@ant-design/icons';
 import { useCityFilterOptions } from '../../hooks/cities.hook';
 import { useDebounce } from '../../hooks/useDebounce';
-import { FALLBACK_FILTER_OPTIONS, PRICE_RANGES, SCORE_RANGES } from '../../types/fallbackFilterOptions';
+import { FALLBACK_FILTER_OPTIONS, PRICE_RANGES } from '../../types/fallbackFilterOptions';
 import type { CityFilters } from '../../types';
 import { getCountryName } from '../../utils/countries.utils';
 
@@ -35,19 +35,6 @@ export default function CityFiltersComponent({ filters, onFilterChange }: Props)
     [filters, onFilterChange]
   );
 
-  const handleScoreRangeChange = useCallback(
-    (value: string) => {
-      const range = SCORE_RANGES.find(r => r.key === value);
-      onFilterChange({
-        ...filters,
-        minScore: range?.value?.min,
-        maxScore: range?.value?.max,
-        page: 1,
-      });
-    },
-    [filters, onFilterChange]
-  );
-
   const handlePriceRangeChange = useCallback(
     (value: string) => {
       const range = PRICE_RANGES.find(r => r.key === value);
@@ -65,11 +52,6 @@ export default function CityFiltersComponent({ filters, onFilterChange }: Props)
     setSearchTerm('');
     onFilterChange({ page: 1, limit: filters.limit || 20 });
   }, [filters.limit, onFilterChange]);
-
-  const getSelectedScoreKey = () =>
-    SCORE_RANGES.find(
-      r => r.value?.min === filters.minScore && r.value?.max === filters.maxScore
-    )?.key;
 
   const getSelectedPriceKey = () =>
     PRICE_RANGES.find(
@@ -124,19 +106,6 @@ export default function CityFiltersComponent({ filters, onFilterChange }: Props)
           </Select>
         </Col> */}
 
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Select
-            placeholder="Score Range"
-            value={getSelectedScoreKey()}
-            onChange={handleScoreRangeChange}
-            allowClear
-            className="w-full"
-          >
-            {SCORE_RANGES.map(r => (
-              <Option key={r.key} value={r.key}>{r.label}</Option>
-            ))}
-          </Select>
-        </Col>
 
         <Col xs={24} sm={12} md={8} lg={6}>
           <Select

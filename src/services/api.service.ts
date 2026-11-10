@@ -45,16 +45,6 @@ export const politiciansApi = {
   delete: (id: number) =>
     client.delete<void>(`/politicians/${id}`),
 
-  upsertRatings: (
-id: number, body: any,
-  ) =>
-    client
-      .put<ApiResponse<Politician>>(
-        `/politicians/${id}/ratings`,
-        body,
-      )
-      .then((r) => r.data),
-
   getFilterOptions: () =>
     client.get<{
       designations: string[];
