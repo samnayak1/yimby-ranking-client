@@ -239,3 +239,26 @@ export interface Resource {
 // Optional fields accept "" so a cleared form field removes the stored value.
 export type CreatorInput  = Partial<Omit<Creator, 'id'>> & { name: string; platform: CreatorPlatform; url: string };
 export type ResourceInput = Partial<Omit<Resource, 'id'>> & { category: ResourceCategory; title: string; url: string };
+
+// ---- Scraped news (written nightly by the crawler) ----
+
+export type NewsOutcome = 'WIN' | 'LOSS' | 'NEUTRAL';
+
+export interface NewsArticle {
+  id:          number;
+  url:         string;
+  source:      string;
+  title:       string;
+  summary:     string | null;
+  publishedOn: string | null;
+  cityName:    string | null;
+  countryCode: string | null;
+  outcome:     NewsOutcome | null;
+  tags:        string[];
+  hidden:      boolean;
+}
+
+export interface NewsQuery {
+  outcome?:     NewsOutcome;
+  countryCode?: string;
+}

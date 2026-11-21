@@ -2,12 +2,15 @@ import { lazy, Suspense, type ReactNode } from 'react';
 import { Spin, Tabs } from 'antd';
 import {
   TeamOutlined, GlobalOutlined, PictureOutlined, ColumnWidthOutlined, VideoCameraOutlined, ReadOutlined,
+  FileSearchOutlined,
 } from '@ant-design/icons';
 import PoliticiansTable from '../components/politicians/PoliticiansTable';
 import CitiesView from '../components/cities/CitiesView';
 import MediaTabs from '../components/media/MediaTabs';
 import { CreatorsSection, ResourcesSection } from '../components/media/MediaLists';
 import { useCreators, useResources } from '../hooks/media.hook';
+import { useNews } from '../hooks/news.hook';
+import ScrapedNewsSection from '../components/news/ScrapedNewsSection';
 import type { AuthUser } from '../types';
 import Navbar from '../components/NavBar';
 import Footer from '../components/Footer';
@@ -65,11 +68,14 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
   const isMobile = useIsMobile();
   const creators = useCreators();
   const resources = useResources();
+  // Same query as the tab's unfiltered visitor view, so it's one shared request.
+  const news = useNews({}, false);
 
   // Admin-managed lists: visitors don't get a tab that opens onto nothing,
   // admins always see it so they can add the first entry.
   const creatorsEmpty = !creators.isLoading && (creators.data ?? []).length === 0;
   const resourcesEmpty = !resources.isLoading && (resources.data ?? []).length === 0;
+  const newsEmpty = !news.isLoading && (news.data?.pages[0]?.data ?? []).length === 0;
 
   const tabs = [
     {
@@ -101,6 +107,11 @@ export default function HomePage({ user, isAdmin, onLogout }: Props) {
       key:      'resources',
       label:    tabLabel(<ReadOutlined />, 'Articles & resources'),
       children: <ResourcesSection isAdmin={isAdmin} />,
+    }] : []),
+    ...(isAdmin || !newsEmpty ? [{
+      key:      'scraped-news',
+      label:    tabLabel(<FileSearchOutlined />, 'Scraped News Articles'),
+      children: <ScrapedNewsSection isAdmin={isAdmin} />,
     }] : []),
     {
       key:      'compare',

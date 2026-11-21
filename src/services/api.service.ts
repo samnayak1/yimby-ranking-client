@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { getAccessToken } from './auth.service';
-import type { ApiResponse, Creator, CreatorInput, Resource, ResourceCategory, ResourceInput, City, CityMapPoint, PaginatedResponse, Politician, UpsertCityBody, UpsertCityInput, UpsertCityRatingBody, UpsertPoliticianBody, UpsertPoliticianInput } from '../types';
+import type { ApiResponse, Creator, NewsArticle, NewsQuery, CreatorInput, Resource, ResourceCategory, ResourceInput, City, CityMapPoint, PaginatedResponse, Politician, UpsertCityBody, UpsertCityInput, UpsertCityRatingBody, UpsertPoliticianBody, UpsertPoliticianInput } from '../types';
 
 const client = axios.create({
     baseURL: '/api',
@@ -121,4 +121,15 @@ export const resourcesApi = {
   update: (id: number, body: Partial<ResourceInput>) =>
     client.patch<ApiResponse<Resource>>(`/resources/${id}`, body).then(r => r.data.data),
   delete: (id: number) => client.delete<void>(`/resources/${id}`),
+};
+
+export const newsApi = {
+  // Admins get the list with hidden articles included, so they can be restored.
+  getPage: (query: NewsQuery, page: number, admin = false) =>
+    client
+      .get<PaginatedResponse<NewsArticle>>(admin ? '/news/admin' : '/news', { params: { ...query, page, limit: 20 } })
+      .then(r => r.data),
+  getCountries: () => client.get<ApiResponse<string[]>>('/news/filter/countries').then(r => r.data.data),
+  setHidden: (id: number, hidden: boolean) =>
+    client.patch<ApiResponse<NewsArticle>>(`/news/${id}`, { hidden }).then(r => r.data.data),
 };
