@@ -1,4 +1,7 @@
 import type { ReactNode } from 'react';
+import { Button, message } from 'antd';
+import { CopyOutlined, PictureOutlined } from '@ant-design/icons';
+import { renderMythImage } from './mythImage';
 import Donut, { type DonutSlice } from './Donut';
 
 /*
@@ -24,6 +27,8 @@ interface Myth {
   key: string;
   myth: string;
   fact: ReactNode;
+  // Plain-text version of the fact, for pasting into comment threads.
+  factText: string;
   slices: DonutSlice[];
   centerLabel: string[];
   decimals?: 0 | 1;
@@ -44,6 +49,7 @@ const MYTHS: Myth[] = [
         taken, need work, or are empty for other reasons.
       </>
     ),
+    factText: 'Only about 1 in 4 of America’s 14 million vacant homes are actually for rent or for sale. The rest are vacation homes, already rented or sold, need repairs, or are empty for other reasons.',
     slices: [
       { key: 'available', label: 'For rent or for sale', short: 'for rent or sale', note: 'Available to move into now.', value: 3_649_763, color: GREEN },
       { key: 'seasonal', label: 'Vacation and seasonal homes', short: 'vacation homes', note: 'Beach houses and cabins nobody lives in year-round.', value: 4_342_127, color: GREYS[0] },
@@ -72,6 +78,7 @@ const MYTHS: Myth[] = [
         single-family homes. More than 8 in 10 are lived in by the people who own them.
       </>
     ),
+    factText: 'Large investors (companies with 1,000+ homes) own about 1 in 200 US single-family homes. More than 8 in 10 are lived in by the people who own them.',
     slices: [
       { key: 'large', label: 'Large investors (1,000+ homes)', short: 'large investors', note: '32 companies, as of June 2022.', value: 450_000, color: BLUE },
       { key: 'landlords', label: 'Other landlords', short: 'other landlords', note: 'Landlords with fewer than 1,000 homes.', value: 13_942_315, color: GREYS[2] },
@@ -98,6 +105,7 @@ const MYTHS: Myth[] = [
         close to their 15% share of the population. Most of them are US citizens.
       </>
     ),
+    factText: 'Immigrants head about 1 in 6 US households, close to their 15% share of the population. Most of them are US citizens.',
     slices: [
       { key: 'noncitizen', label: 'Born abroad, not a citizen', short: 'not a citizen', note: 'Green-card holders, visa holders and others.', value: 8_678_453, color: BLUE },
       { key: 'naturalized', label: 'Born abroad, now a citizen', short: 'naturalized', value: 12_841_318, color: BLUE_LIGHT },
@@ -129,6 +137,91 @@ function SourceLine({ text, sources }: { text: string; sources: Source[] }) {
   );
 }
 
+const sourceLines = (m: Myth) =>
+  `Source: ${m.sourceText} ${m.sources.map(s => `${s.label} (${s.href})`).join(', ')}`;
+
+function formatCount(n: number): string {
+  return n >= 1_000_000
+    ? `${(n / 1_000_000).toFixed(1)} million`
+    : n.toLocaleString('en-US');
+}
+
+// Two lengths of text, for a reply that will be challenged and a full
+// rebuttal. The breakdown is built from the chart's own slices so the
+// pasted figures always match what the page shows.
+function copyVariants(m: Myth) {
+  const total = m.slices.reduce((sum, s) => sum + s.value, 0);
+  const breakdown = m.slices
+    .map(s => `• ${s.label}: ${formatCount(s.value)} (${(s.value / total * 100).toFixed(m.decimals ?? 0)}%)`)
+    .join('\n');
+
+  return [
+    { key: 'source', label: 'With source', text: `${m.factText}\n\n${sourceLines(m)}` },
+    {
+      key:   'full',
+      label: 'Full',
+      text:  [
+        `Myth: “${m.myth}”`,
+        `Fact: ${m.factText}`,
+        `${m.summaryLead} (${formatCount(total)}):\n${breakdown}`,
+        sourceLines(m),
+      ].join('\n\n'),
+    },
+  ];
+}
+
+async function copy(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+    message.success('Copied to clipboard');
+  } catch {
+    message.error('Couldn’t copy — your browser blocked clipboard access');
+  }
+}
+
+async function copyImage(m: Myth) {
+  const png = renderMythImage({
+    myth:        m.myth,
+    factText:    m.factText,
+    slices:      m.slices,
+    decimals:    m.decimals,
+    centerLabel: m.centerLabel,
+    // Links can't be clicked in an image, so name the tables without them.
+    source:      `Source: ${m.sourceText} ${m.sources.map(s => s.label).join(', ')}`,
+  });
+  try {
+    // The blob is handed over as a promise so Safari still counts the write as
+    // part of the click, even though rendering finishes later.
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
+    message.success('Image copied to clipboard');
+  } catch {
+    // Browsers that can't put images on the clipboard get a download instead.
+    const url = URL.createObjectURL(await png);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `housing-myth-${m.key}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+    message.info('Your browser can’t copy images, so it was downloaded instead');
+  }
+}
+
+function CopyButtons({ myth }: { myth: Myth }) {
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2">
+      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-400">Copy</span>
+      <Button size="small" icon={<PictureOutlined />} onClick={() => copyImage(myth)}>
+        Image
+      </Button>
+      {copyVariants(myth).map(v => (
+        <Button key={v.key} size="small" icon={<CopyOutlined />} onClick={() => copy(v.text)}>
+          {v.label}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
 export default function HousingMyths() {
   return (
     <section aria-labelledby="housing-myths" className="mt-10">
@@ -152,6 +245,7 @@ export default function HousingMyths() {
             </div>
 
             <SourceLine text={m.sourceText} sources={m.sources} />
+            <CopyButtons myth={m} />
           </article>
         ))}
       </div>
