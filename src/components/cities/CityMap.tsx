@@ -12,28 +12,46 @@ interface Props {
 // whatever zoom fits the whole country into the container, phone or desktop.
 const US_BOUNDS = L.latLngBounds([24.4, -125.0], [49.4, -66.9]);
 
-// Each marker shows the city's permits per 1,000 residents (latest year), in
-// one colour: the number is the comparison, not a judgement. Grey when missing.
-function makeIcon(permits?: number) {
-  const color = permits != null ? '#1a6641' : '#9ca3af';
+// Each marker shows the city's median house price, in one neutral colour: the
+// number is the comparison, not a judgement. Lighter grey when missing.
+const INK = '#374151';
+const MISSING = '#9ca3af';
+
+// Compact enough to fit on a marker: $450K, $1.2M.
+function formatPrice(price: number, currency: string | null): string {
+  return new Intl.NumberFormat('en-US', {
+    style:                 'currency',
+    currency:              currency ?? 'USD',
+    notation:              'compact',
+    maximumFractionDigits: 1,
+  }).format(price);
+}
+
+// A pill rather than a circle: prices are wider than the old permit figures.
+function makeIcon(label: string | null) {
   return L.divIcon({
     className: '',
     html: `<div style="
-      background:${color};
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      background:${label ? INK : MISSING};
       color:white;
       font-weight:700;
       font-size:11px;
-      width:34px;
-      height:34px;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+      line-height:1;
+      white-space:nowrap;
+      padding:6px 8px;
+      border-radius:999px;
       border:2px solid white;
       box-shadow:0 2px 6px rgba(0,0,0,0.25);
-    ">${permits != null ? formatPermits(permits) : '?'}</div>`,
-    iconSize:   [34, 34],
-    iconAnchor: [17, 17],
+    ">${label ?? '?'}</div>`,
+    // Zero-size anchor at the city; the pill centres itself on it, whatever
+    // its width. The popup opens just above the pill.
+    iconSize:    [0, 0],
+    iconAnchor:  [0, 0],
+    popupAnchor: [0, -14],
   });
 }
 
@@ -97,20 +115,23 @@ export default function CityMap({ cities }: Props) {
             }).format(c.medianHousePrice)
           : '—';
 
-        const marker = L.marker([c.lat!, c.lng!], { icon: makeIcon(permits) })
+        const label = c.medianHousePrice != null ? formatPrice(c.medianHousePrice, c.currency) : null;
+
+        const marker = L.marker([c.lat!, c.lng!], { icon: makeIcon(label) })
           .addTo(map)
           .bindPopup(`
             <div style="font-family:Inter,sans-serif;min-width:160px">
-              <div style="font-weight:700;color:#1a6641;margin-bottom:4px">${c.name}</div>
+              <div style="font-weight:700;color:#111827;margin-bottom:4px">${c.name}</div>
               <div style="color:#6b7280;font-size:12px">
                 ${getCountryName(c.country ?? '')}${c.region ? `, ${c.region}` : ''}
               </div>
               <div style="margin-top:8px;font-size:12px">
-                <span style="color:#9ca3af">Median price:</span> ${price}
+                <span style="color:#9ca3af">Median price:</span>
+                <span style="color:${INK};font-weight:700">${price}</span>
               </div>
               <div style="font-size:12px">
                 <span style="color:#9ca3af">Permits / 1,000 residents:</span>
-                <span style="color:#1a6641;font-weight:700">
+                <span style="color:${INK};font-weight:700">
                   ${permits != null ? formatPermits(permits) : '—'}
                 </span>
               </div>
